@@ -1,0 +1,59 @@
+program = {var decl | statement};
+var decl = "let", identifier, ["=", expr];
+statement = 
+    compound statement
+    | select statement
+    | loop statement
+    | expr statement;
+compound statement = "{", {var decl, statement}, "}";
+select statement = "if", "(", expr, ")", statement, ["else", statement];
+loop statement = "while", "(", expr, ")", statement;
+expr statement = expr;
+
+expr = assign;
+assign = identifier, "=", expr | logic or;
+logic or = logic and | logic or, "||", logic and;
+logic and = logic eq | logic and, "&&", logic eq;
+logic eq = logic comp | logic eq, ("==" | "!="), logic comp;
+logic comp = add | logic comp, ("<" | "<=" | ">" | ">="), add;
+add = mult | add, ("+" | "-"), mult;
+mult = unary | mult, ("*" | "/" | "%"), unary;
+unary = primary | ("!" | "+" | "-"), primary;
+primary = identifier | func call | "(", expr, ")" | literal;
+func call = identifier, "(", [expr], {",", expr}, ")";
+
+# lexical grammar
+number literal = number;
+string literal = '"', {character  - '"'}, '"';
+
+identifier = (letter | "_"), {letter | digit | "_"};
+number = digit, {digit}, [".", digit, {digit}]; 
+letter = "A" | "B" | "C" | "D" | "E" | "F" | "G"
+       | "H" | "I" | "J" | "K" | "L" | "M" | "N"
+       | "O" | "P" | "Q" | "R" | "S" | "T" | "U"
+       | "V" | "W" | "X" | "Y" | "Z" | "a" | "b"
+       | "c" | "d" | "e" | "f" | "g" | "h" | "i"
+       | "j" | "k" | "l" | "m" | "n" | "o" | "p"
+       | "q" | "r" | "s" | "t" | "u" | "v" | "w"
+       | "x" | "y" | "z" ;
+digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+space = " " | "\r" | "\n" | "\t";
+symbol = "[" | "]" | "{" | "}" | "(" | ")" | "<" | ">"
+       | "'" | '"' | "=" | "|" | "." | "," | ";" ;
+character = letter | digit | symbol | space | "_" ;
+
+spaces = space, {space};
+separator = "(" | ")" | "{" | "}" | ",";
+keyword = "let" | "if" | "else" | "while" | "none" | "true" | "false";
+operator = "+" | "-" | "!" | "*" | "/" | "%" 
+        | "==" | "!=" | "<" | "<=" | ">" | ">="
+        | "&&" | "||" | "=";
+word = keyword | identifier;
+number literal = number;
+none literal = "none";
+boolean literal = "true" | "false";
+literal = number literal | string literal | boolean literal | none literal;
+
+line comment = "//", {character - "\n"}, "\n";
+
+token = spaces | word | literal | separator | line comment | operator;
