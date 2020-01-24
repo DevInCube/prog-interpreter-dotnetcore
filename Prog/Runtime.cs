@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Prog
 {
-    public static class Runtime
+    public static class Runtime_old
     {
         public static void Execute(Tree<AstNode> tree)
         {

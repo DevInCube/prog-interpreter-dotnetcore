@@ -16,15 +16,38 @@ namespace Prog
         }
     }
 
+    public class Variable
+    {
+        public string Name { get; }
+        public ProgValue Value { get; set; }
+
+        public Variable(string name, ProgValue value = null)
+        {
+            this.Name = name;
+            this.Value = value;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Variable variable &&
+                   Name == variable.Name;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name);
+        }
+    }
+
     public class SymbolTable
     {
-        private Stack<HashSet<string>> scopes = new Stack<HashSet<string>>();
+        private Stack<HashSet<Variable>> scopes = new Stack<HashSet<Variable>>();
 
-        public void EnterScope() => scopes.Push(new HashSet<string>());
+        public void EnterScope() => scopes.Push(new HashSet<Variable>());
         public void LeaveScope() => scopes.Pop();
-        public bool FindSymbol(string symbol) => scopes.Any(x => x.Contains(symbol));
-        public void AddSymbol(string symbol) => scopes.Peek().Add(symbol);
-        public bool CheckScope(string symbol) => scopes.Peek().Contains(symbol);
+        public Variable FindSymbol(string symbol) => scopes.LastOrDefault(x => x.Any(t => t.Name == symbol)).FirstOrDefault(t => t.Name == symbol);
+        public void AddSymbol(string symbol) => scopes.Peek().Add(new Variable(symbol, NoneValue.Value));
+        public bool CheckScope(string symbol) => scopes.Peek().Any(x => x.Name == symbol);
     }
 
     public class SemanticAnalyzer
@@ -44,38 +67,38 @@ namespace Prog
             Check(_tree);
         }
 
-private void Check(Tree<AstNode> tree, Tree<AstNode> parent = null)
-{
-    switch (tree.Value.Type)
-    {
-        case AstNodeType.Operation when (string)tree.Value.Value == "=":
-            CheckAssignment(tree);
-            break;
-        case AstNodeType.Identifier when tree.Children.Count == 1:
-            CheckFunctionCall(tree);
-            break;
-        case AstNodeType.Identifier when tree.Children.Count == 0:
-            CheckIdentifierUse(tree, parent);
-            break;
-        case AstNodeType.IfStatement:
-        case AstNodeType.WhileStatement:
-            CheckTestExpression(tree);
-            break;
-        case AstNodeType.Program:
-        case AstNodeType.Block:
-            _symbolTable.EnterScope();
-            break;
-    }
-    foreach (var child in tree.Children)
-        Check(child, tree);
-    switch (tree.Value.Type)
-    {
-        case AstNodeType.Program:
-        case AstNodeType.Block:
-            _symbolTable.LeaveScope();
-            break;
-    }
-}
+        private void Check(Tree<AstNode> tree, Tree<AstNode> parent = null)
+        {
+            switch (tree.Value.Type)
+            {
+                case AstNodeType.Operation when (string)tree.Value.Value == "=":
+                    CheckAssignment(tree);
+                    break;
+                case AstNodeType.Identifier when tree.Children.Count == 1:
+                    CheckFunctionCall(tree);
+                    break;
+                case AstNodeType.Identifier when tree.Children.Count == 0:
+                    CheckIdentifierUse(tree, parent);
+                    break;
+                case AstNodeType.IfStatement:
+                case AstNodeType.WhileStatement:
+                    CheckTestExpression(tree);
+                    break;
+                case AstNodeType.Program:
+                case AstNodeType.Block:
+                    _symbolTable.EnterScope();
+                    break;
+            }
+            foreach (var child in tree.Children)
+                Check(child, tree);
+            switch (tree.Value.Type)
+            {
+                case AstNodeType.Program:
+                case AstNodeType.Block:
+                    _symbolTable.LeaveScope();
+                    break;
+            }
+        }
 
         private void CheckAssignment(Tree<AstNode> tree)
         {
@@ -99,7 +122,7 @@ private void Check(Tree<AstNode> tree, Tree<AstNode> parent = null)
                 else
                     _symbolTable.AddSymbol(varName);
             else
-                if (!_symbolTable.FindSymbol(varName))
+                if (_symbolTable.FindSymbol(varName) == null)
                 throw new Exception($"Undefined variable {varName}");
         }
 
