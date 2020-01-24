@@ -29,6 +29,16 @@ namespace Prog
         new BooleanValue Calculate(Runtime runtime);
     }
 
+    public interface IStringExpression : IExpression
+    {
+        new StringValue Calculate(Runtime runtime);
+    }
+
+    public interface INoneExpression : IExpression
+    {
+        new NoneValue Calculate(Runtime runtime);
+    }
+
     public abstract class Ast : IExecutable
     {
         public abstract void Execute(Runtime runtime);
@@ -473,6 +483,42 @@ namespace Prog
         public NumberValue Calculate(Runtime runtime)
         {
             return _value;
+        }
+
+        ProgValue IExpression.Calculate(Runtime runtime)
+        {
+            return ((INumericalExpression)this).Calculate(runtime);
+        }
+    }
+
+    public class StringLiteral : IStringExpression
+    {
+        private readonly StringValue _value;
+        public StringLiteral(StringValue value)
+        {
+            this._value = value;
+        }
+
+        public StringValue Calculate(Runtime runtime)
+        {
+            return _value;
+        }
+
+        ProgValue IExpression.Calculate(Runtime runtime)
+        {
+            return ((INumericalExpression)this).Calculate(runtime);
+        }
+    }
+
+    public class NoneLiteral : INoneExpression
+    {
+        public NoneLiteral()
+        {
+        }
+
+        public NoneValue Calculate(Runtime runtime)
+        {
+            return NoneValue.Value;
         }
 
         ProgValue IExpression.Calculate(Runtime runtime)
