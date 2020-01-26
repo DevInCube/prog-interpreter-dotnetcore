@@ -1,24 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Prog
 {
-class Program
-{
-    static void Main(string[] args)
+    class TestWalker : SyntaxWalker<object>
     {
-        if (args.Length == 0)
+        public List<SyntaxNode> Items = new List<SyntaxNode>();
+
+        public override object Visit(IdentifierNameSyntax syntax)
         {
-            Console.WriteLine("Prog: fatal error: No input files");
-            Environment.Exit(1);
+            Items.Add(syntax);
+            return null;
         }
-        var text = File.ReadAllText(args[0]);
-        var lexer = new Lexer(text);
-        var tokens = lexer.Analyze();
-        foreach (var token in tokens)
-            Console.Write($"({token.Type}:{token.Value})");
-        
+    }
+
+    internal class Program
+    {
+        internal static void Main(string[] args)
+        {
+            if (args.Length == 0)
+            {
+                Console.WriteLine("Prog: fatal error: No input files");
+                Environment.Exit(1);
+            }
+            var text = File.ReadAllText(args[0]);
+            var lexer = new Lexer(text);
+            var tokens = lexer.Analyze();
+            var filteredTokens = tokens
+                .Where(x => x.Type != TokenType.Comment && x.Type != TokenType.Whitespace)
+                .ToList();
+            foreach (var token in filteredTokens)
+                Console.Write($"({token.Type}:`{token.Value}`)");
+            var tree = Parser.AnalyzeSyntax(filteredTokens);
+            Console.WriteLine();
+            PrintParseTree(tree);
+            // //
+            // var walker = new TestWalker();
+            // tree.Accept(walker);
+            // foreach (var item in walker.Items) Console.WriteLine($"var: {((IdentifierNameSyntax)item).Name}");
+
+            var executionVisitor = new ExecutionVisitor();
+            tree.Accept(executionVisitor);
             // var tree = Parser.AnalyzeSyntax(tokens);
             // var json = JsonSerializer.Serialize(tree, new JsonSerializerOptions
             // {
@@ -33,16 +57,16 @@ class Program
             // Runtime.Execute(tree);
         }
 
-        static void PrintParseTree(Tree<AstNode> root)
+        static void PrintParseTree(ProgramSyntax syntaxTree)
         {
-            if (root != null)
-                PrintPretty(root, "", true, true);
+            if (syntaxTree != null)
+                PrintPretty(syntaxTree, "", true, true);
             else
                 Console.WriteLine("(empty)");
         }
 
         // adapted from: https://stackoverflow.com/a/1649223
-        static void PrintPretty(Tree<AstNode> node, string indent, bool root, bool last)
+        static void PrintPretty(SyntaxNode node, string indent, bool root, bool last)
         {
             Console.Write(indent);
             string newIndent;
@@ -72,13 +96,13 @@ class Program
 
             string GetValue()
             {
-                return node.Value.Type switch
+                return node switch
                 {
-                    AstNodeType.Identifier => node.Value.Value as string,
-                    AstNodeType.String => $"\"{node.Value.Value}\"",
-                    AstNodeType.Number => $"{(double)node.Value.Value}",
-                    AstNodeType.Operation => node.Value.Value as string,
-                    _ => node.Value.Type.ToString(),
+                    var _ when node is IdentifierNameSyntax idName => idName.Name,
+                    var _ when node is UnaryExpressionSyntax uexpr => uexpr.OperatorToken.Value,
+                    var _ when node is BinaryExpressionSyntax bexpr => bexpr.OperatorToken.Value,
+                    var _ when node is LiteralExpressionSyntax literal => literal.Token.Value,
+                    _ => node.GetType().ToString(),
                 };
             }
         }
