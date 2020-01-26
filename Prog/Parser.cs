@@ -34,7 +34,7 @@ namespace Prog
         public void EnterScope() => scopes.Push(new HashSet<Variable>());
         public void LeaveScope() => scopes.Pop();
         public Variable FindSymbol(string symbol) => scopes.LastOrDefault(x => x.Any(t => t.Name == symbol))?.FirstOrDefault(t => t.Name == symbol);
-        public void AddSymbol(string symbol) => scopes.Peek().Add(new Variable(symbol, NoneValue.Value));
+        public void AddSymbol(string symbol, ProgValue value) => scopes.Peek().Add(new Variable(symbol, value));
         public bool CheckScope(string symbol) => scopes.Peek().Any(x => x.Name == symbol);
     }
 

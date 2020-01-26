@@ -32,12 +32,10 @@ namespace Prog
 
         public override ProgValue Visit(VariableDeclarationStatementSyntax syntax)
         {
-            var value = syntax.Value?.Accept(this);
+            var value = syntax.Value?.Accept(this) ?? NoneValue.Value;
             Log($"VAR: {syntax.Identifier.Name} = {value}");
-            _symbolTable.AddSymbol(syntax.Identifier.Name);
-            if (value != null)
-                _symbolTable.FindSymbol(syntax.Identifier.Name).Value = value;
-            return value ?? NoneValue.Value;
+            _symbolTable.AddSymbol(syntax.Identifier.Name, value);
+            return value;
         }
 
         public override ProgValue Visit(BlockSyntax syntax)
@@ -108,7 +106,6 @@ namespace Prog
             ProgValue Assignment()
             {
                 var varName = (syntax.Left as IdentifierNameSyntax).Name;
-                _symbolTable.AddSymbol(varName);
                 var value = syntax.Right.Accept(this);
                 _symbolTable.FindSymbol(varName).Value = value;
                 return value;
