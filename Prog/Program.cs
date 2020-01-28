@@ -5,17 +5,6 @@ using System.Linq;
 
 namespace Prog
 {
-    class TestWalker : SyntaxWalker<object>
-    {
-        public List<SyntaxNode> Items = new List<SyntaxNode>();
-
-        public override object Visit(IdentifierNameSyntax syntax)
-        {
-            Items.Add(syntax);
-            return null;
-        }
-    }
-
     internal class Program
     {
         internal static void Main(string[] args)

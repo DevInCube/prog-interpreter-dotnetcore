@@ -6,13 +6,10 @@ namespace Prog
 {
     public abstract class SyntaxNode
     {
+        // public SyntaxNode Parent { get; }
         public List<SyntaxNode> Children { get; } = new List<SyntaxNode>();
 
         public abstract TResult Accept<TResult>(SyntaxVisitor<TResult> visitor);
-        //
-        // public SyntaxNode Parent { get; }
-        // public SyntaxKind Kind() { throw new NotImplementedException(); }
-        // public bool IsKind(SyntaxKind kind) { throw new NotImplementedException(); }
     }
 
     public sealed class ProgramSyntax : SyntaxNode

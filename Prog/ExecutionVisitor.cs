@@ -78,6 +78,11 @@ namespace Prog
             return NoneValue.Value;
         }
 
+        public override ProgValue Visit(ExpressionStatementSyntax syntax)
+        {
+            return syntax.Expression.Accept(this);
+        }
+
         public override ProgValue Visit(BinaryExpressionSyntax syntax)
         {
             Log($"BINARY: {syntax.OperatorToken}");
@@ -85,7 +90,8 @@ namespace Prog
             var leftOperand = syntax.Left.Accept(this);
             var rightOperand = syntax.Right.Accept(this);
             _indentationLevel -= 1;
-            return syntax.OperatorToken.Value switch {
+            return syntax.OperatorToken.Value switch
+            {
                 "+" => new NumberValue((leftOperand as NumberValue) + (rightOperand as NumberValue)),
                 "-" => new NumberValue((leftOperand as NumberValue) - (rightOperand as NumberValue)),
                 "*" => new NumberValue((leftOperand as NumberValue) * (rightOperand as NumberValue)),
@@ -118,23 +124,20 @@ namespace Prog
             _indentationLevel += 1;
             var operandValue = syntax.Operand.Accept(this);
             _indentationLevel -= 1;
-            return syntax.OperatorToken.Value switch {
+            return syntax.OperatorToken.Value switch
+            {
                 "+" => operandValue,
-                "-" => new NumberValue(-(operandValue as NumberValue).Value),
-                "!" => new BooleanValue(!(operandValue as BooleanValue).Value),
+                "-" => new NumberValue(-(operandValue as NumberValue)),
+                "!" => new BooleanValue(!(operandValue as BooleanValue)),
                 _ => throw new Exception("Unsupported unary operator."),
             };
-        }
-
-        public override ProgValue Visit(ExpressionStatementSyntax syntax)
-        {
-            return syntax.Expression.Accept(this);
         }
 
         public override ProgValue Visit(LiteralExpressionSyntax syntax)
         {
             Log($"LITERAL: {syntax.Token.Value}");
-            return syntax.Token.Value switch {
+            return syntax.Token.Value switch
+            {
                 "none" => NoneValue.Value,
                 "true" => new BooleanValue(true),
                 "false" => new BooleanValue(false),
@@ -143,7 +146,7 @@ namespace Prog
             };
         }
 
-         public override ProgValue Visit(IdentifierNameSyntax syntax)
+        public override ProgValue Visit(IdentifierNameSyntax syntax)
         {
             var value = _symbolTable.FindSymbol(syntax.Name)?.Value;  // @todo
             Log($"ID: {syntax.Name} = {value}");
@@ -158,7 +161,5 @@ namespace Prog
                 throw new Exception($"Undefined function `{syntax.IdentifierName.Name}`.");
             return function.Call(arguments);
         }
-
-
     }
 }
