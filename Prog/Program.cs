@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace Prog
 {
-    internal class Program
+    internal partial class Program
     {
         internal static void Main(string[] args)
         {
@@ -15,6 +14,7 @@ namespace Prog
                 Environment.Exit(1);
             }
             var text = File.ReadAllText(args[0]);
+            // lexical analysis
             var lexer = new Lexer(text);
             var tokens = lexer.Analyze();
             var filteredTokens = tokens
@@ -22,78 +22,14 @@ namespace Prog
                 .ToList();
             foreach (var token in filteredTokens)
                 Console.Write($"({token.Type}:`{token.Value}`)");
-            var tree = Parser.AnalyzeSyntax(filteredTokens);
+            // parse
+            var parser = new Parser(lexer);
+            var syntaxTree = parser.Parse();
             Console.WriteLine();
-            PrintParseTree(tree);
-            // //
-            // var walker = new TestWalker();
-            // tree.Accept(walker);
-            // foreach (var item in walker.Items) Console.WriteLine($"var: {((IdentifierNameSyntax)item).Name}");
-
+            SyntaxTreePrinter.PrintParseTree(syntaxTree);
+            // execution
             var executionVisitor = new ExecutionVisitor();
-            tree.Accept(executionVisitor);
-            // var tree = Parser.AnalyzeSyntax(tokens);
-            // var json = JsonSerializer.Serialize(tree, new JsonSerializerOptions
-            // {
-            //     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            //     WriteIndented = true
-            // });
-            // File.WriteAllText(Path.Join(Path.GetDirectoryName(args[0]), "ast.json"), json);
-            // var semAnalyzer = new SemanticAnalyzer(tree);
-            // semAnalyzer.Analyze();
-            // //Console.WriteLine();
-            // //PrintParseTree(tree);
-            // Runtime.Execute(tree);
-        }
-
-        static void PrintParseTree(ProgramSyntax syntaxTree)
-        {
-            if (syntaxTree != null)
-                PrintPretty(syntaxTree, "", true, true);
-            else
-                Console.WriteLine("(empty)");
-        }
-
-        // adapted from: https://stackoverflow.com/a/1649223
-        static void PrintPretty(SyntaxNode node, string indent, bool root, bool last)
-        {
-            Console.Write(indent);
-            string newIndent;
-            if (last)
-            {
-                if (!root)
-                {
-                    Console.Write("└─");
-                    newIndent = indent + "◦◦";
-                }
-                else
-                {
-                    newIndent = indent + "";
-                }
-            }
-            else
-            {
-                Console.Write("├─");
-                newIndent = indent + "│◦";
-            }
-            Console.Write($"{ GetValue()}\n");
-            for (var i = 0; i < node.Children.Count; i++)
-            {
-                var child = node.Children[i];
-                PrintPretty(child, newIndent, false, i == node.Children.Count - 1);
-            }
-
-            string GetValue()
-            {
-                return node switch
-                {
-                    var _ when node is IdentifierNameSyntax idName => idName.Name,
-                    var _ when node is UnaryExpressionSyntax uexpr => uexpr.OperatorToken.Value,
-                    var _ when node is BinaryExpressionSyntax bexpr => bexpr.OperatorToken.Value,
-                    var _ when node is LiteralExpressionSyntax literal => literal.Token.Value,
-                    _ => node.GetType().ToString(),
-                };
-            }
+            var _ = syntaxTree.Accept(executionVisitor);
         }
     }
 }
