@@ -71,22 +71,6 @@ namespace Prog
         };
     }
 
-    public enum AstNodeType
-    {
-        Program,
-        VarDeclaration,
-        Block,
-        IfStatement,
-        WhileStatement,
-        Operation,
-        ArgsList,
-        Identifier,
-        Number,
-        Boolean,
-        String,
-        None,
-    }
-
     public abstract class ProgValue { }
 
     public class NoneValue : ProgValue

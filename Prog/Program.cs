@@ -23,6 +23,7 @@ namespace Prog
             foreach (var token in filteredTokens)
                 Console.Write($"({token.Type}:`{token.Value}`)");
             // parse
+            lexer.Analyze().GetEnumerator().Reset();
             var parser = new Parser(lexer);
             var syntaxTree = parser.Parse();
             Console.WriteLine();

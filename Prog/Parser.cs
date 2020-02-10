@@ -40,75 +40,68 @@ namespace Prog
 
     public class Parser
     {
-        private readonly Lexer _lexer;
-        private int index = 0;
-        private List<Token> tokens;
+        private readonly IList<Token> _tokens;
+        private int _index = 0;
+
+        private bool HasNext => _index != _tokens.Count;
+        private Token Current => _tokens[_index];
+        private void Advance() => _index += 1;
 
         public Parser(Lexer lexer)
         {
-            this._lexer = lexer;
+            this._tokens = lexer.Analyze().ToArray();
         }
 
         public ProgramSyntax Parse()
         {
-            return Parse(this._lexer.Analyze().ToList());
-        }
-
-        private ProgramSyntax Parse(List<Token> tokens)
-        {
-            this.index = 0;
-            this.tokens = tokens;
+            this._index = 0;
             return Program();
         }
 
         private bool SkipTokens()
         {
-            Token currToken = null;
-            while (index < tokens.Count)
+            while (HasNext)
             {
-                currToken = tokens[index];
-                if (currToken.Type != TokenType.Whitespace
-                    && currToken.Type != TokenType.Comment)
-                    break;
-                index += 1;
+                if (Current.Type != TokenType.Whitespace
+                    && Current.Type != TokenType.Comment)
+                    return true;
+                Advance();
             }
-            return (index != tokens.Count);
+            return _index != _tokens.Count;
         }
 
         private Token Accept(TokenType type)
         {
             if (!SkipTokens()) return null;
-            var currToken = tokens[index];
-            if (currToken.Type != type) return null;
-            index += 1;
-            return currToken;
+            var current = Current;
+            if (current.Type != type) return null;
+            Advance();
+            return current;
         }
 
         private Token Accept(string lexeme)
         {
             if (!SkipTokens()) return null;
-            var currToken = tokens[index];
-            if (currToken.Value != lexeme) return null;
-            index += 1;
-            return currToken;
+            var current = Current;
+            if (current.Value != lexeme) return null;
+            Advance();
+            return current;
         }
 
         private Token Expect(string lexeme)
         {
             if (Accept(lexeme) is var tree && tree != null) return tree;
-            if (index == tokens.Count)
+            if (!HasNext)
                 throw new Exception($"Expected `{lexeme}`, reached end of file");
-            var token = tokens[index];
-            throw new Exception($"Expected `{lexeme}`, got `{token.Type}:{token.Value}`");
+            throw new Exception($"Expected `{lexeme}`, got `{Current.Type}:{Current.Value}`");
         }
 
         private Token Expect(TokenType type)
         {
             if (Accept(type) is var tree && tree != null) return tree;
-            if (index == tokens.Count)
+            if (!HasNext)
                 throw new Exception($"Expected `{type}`, reached end of file");
-            var token = tokens[index];
-            throw new Exception($"Expected `{type}`, got `{token.Type}:{token.Value}`");
+            throw new Exception($"Expected `{type}`, got `{Current.Type}:{Current.Value}`");
         }
 
         VariableDeclarationStatementSyntax VarDeclaration()

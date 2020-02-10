@@ -23,6 +23,7 @@ namespace Prog
 
         public IEnumerable<Token> Analyze()
         {
+            this._index = 0;
             while (HasCurrent)
                 yield return ReadToken();
         }
