@@ -12,40 +12,24 @@
 //         [TestCase("5 = 3")]
 //         public void Parse_InputAssignLeftIsNotId_Exception(string text)
 //         {
-//             var lexer = new Lexer(text);
-//             var tokens = lexer.Analyze().ToList();
-//             var tree = Parser.AnalyzeSyntax(tokens);
-//             var semAnalyzer = new SemanticAnalyzer(tree);
-//             Assert.Catch<Exception>(() => semAnalyzer.Analyze());
+
 //         }
 
 //         [TestCase("a = 5")]
 //         [TestCase("a")]
 //         public void Parse_InputAssignUndeclaredVar_Exception(string text)
 //         {
-//             var lexer = new Lexer(text);
-//             var tokens = lexer.Analyze().ToList();
-//             var tree = Parser.AnalyzeSyntax(tokens);
-//             var semAnalyzer = new SemanticAnalyzer(tree);
-//             Assert.Catch<Exception>(() => semAnalyzer.Analyze());
+
 //         }
 //         [TestCase("und_(1)")]
 //         public void Parse_InputCallUndefinedFunc_Exception(string text)
 //         {
-//             var lexer = new Lexer(text);
-//             var tokens = lexer.Analyze().ToList();
-//             var tree = Parser.AnalyzeSyntax(tokens);
-//             var semAnalyzer = new SemanticAnalyzer(tree);
-//             Assert.Catch<Exception>(() => semAnalyzer.Analyze());
+
 //         }
 //         [TestCase("let a\nlet a")]
 //         public void Parse_InputDeclareExistingVar_Exception(string text)
 //         {
-//             var lexer = new Lexer(text);
-//             var tokens = lexer.Analyze().ToList();
-//             var tree = Parser.AnalyzeSyntax(tokens);
-//             var semAnalyzer = new SemanticAnalyzer(tree);
-//             Assert.Catch<Exception>(() => semAnalyzer.Analyze());
+
 //         }
 
 //         // type checking
@@ -53,22 +37,14 @@
 //         [TestCase("if (5) {}")]
 //         public void Parse_InputNumberInTestExpr_Exception(string text)
 //         {
-//             var lexer = new Lexer(text);
-//             var tokens = lexer.Analyze().ToList();
-//             var tree = Parser.AnalyzeSyntax(tokens);
-//             var semAnalyzer = new SemanticAnalyzer(tree);
-//             Assert.Catch<Exception>(() => semAnalyzer.Analyze());
+
 //         }
 
 //         [TestCase("while (2 + 5) {}")]
 //         [TestCase("if (2 + 5) {}")]
 //         public void Parse_InputNumberExprInTestExpr_Exception(string text)
 //         {
-//             var lexer = new Lexer(text);
-//             var tokens = lexer.Analyze().ToList();
-//             var tree = Parser.AnalyzeSyntax(tokens);
-//             var semAnalyzer = new SemanticAnalyzer(tree);
-//             Assert.Catch<Exception>(() => semAnalyzer.Analyze());
+
 //         }
 //     }
 // }
