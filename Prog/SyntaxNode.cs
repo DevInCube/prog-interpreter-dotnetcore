@@ -9,6 +9,8 @@ namespace Prog
         // public SyntaxNode Parent { get; }
         public List<SyntaxNode> Children { get; } = new List<SyntaxNode>();
 
+        public override string ToString() => this.GetType().ToString();
+
         public abstract TResult Accept<TResult>(SyntaxVisitor<TResult> visitor);
     }
 
@@ -100,6 +102,8 @@ namespace Prog
 
         public string Name { get; }
 
+        public override string ToString() => Name;
+
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
             return visitor.Visit(this);
@@ -117,6 +121,8 @@ namespace Prog
         {
             this.Token = token;
         }
+
+        public override string ToString() => this.Token.Value;
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -163,6 +169,8 @@ namespace Prog
         public Token OperatorToken { get; }
         public ExpressionSyntax Operand => (ExpressionSyntax)Children.First();
 
+        public override string ToString() => this.OperatorToken.Value;
+
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
             return visitor.Visit(this);
@@ -184,6 +192,8 @@ namespace Prog
         public Token OperatorToken { get; }
         public ExpressionSyntax Left => (ExpressionSyntax)Children[0];
         public ExpressionSyntax Right => (ExpressionSyntax)Children[1];
+
+        public override string ToString() => this.OperatorToken.Value;
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {

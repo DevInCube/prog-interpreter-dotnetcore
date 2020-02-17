@@ -3,69 +3,76 @@ using System;
 
 namespace Prog
 {
-    public class ExecutionVisitor : SyntaxVisitor<ProgValue>
+    public sealed class ExecutionLogger
     {
-        private readonly SymbolTable _symbolTable = new SymbolTable();
         private int _indentationLevel = 0;
-        private bool _enableLog = false;
+        public bool EnableLog { get; set; }
 
-        private void Log(string message)
+        public void Indent() => _indentationLevel += 1;
+        public void Unindent() => _indentationLevel -= 1;
+
+        public void Log(string message)
         {
-            if (!_enableLog) return;
+            if (!EnableLog) return;
             for (int i = 0; i < _indentationLevel; i++)
                 Console.Write("  ");
             Console.WriteLine(message);
         }
+    }
+    public class ExecutionVisitor : SyntaxVisitor<ProgValue>
+    {
+        private readonly SymbolTable _symbolTable = new SymbolTable();
+        private readonly ExecutionLogger _logger = new ExecutionLogger();
 
         public override ProgValue Visit(ProgramSyntax syntax)
         {
-            Log("PROGRAM BEGIN");
+            _logger.Log("PROGRAM BEGIN");
             _symbolTable.EnterScope();
-            _indentationLevel += 1;
+            _logger.Indent();
             foreach (var statement in syntax.Statements)
                 statement.Accept(this);
-            _indentationLevel -= 1;
+            _logger.Unindent();
             _symbolTable.LeaveScope();
-            Log("PROGRAM END");
+            _logger.Log("PROGRAM END");
             return NoneValue.Value;
         }
 
         public override ProgValue Visit(VariableDeclarationStatementSyntax syntax)
         {
             var value = syntax.Value?.Accept(this) ?? NoneValue.Value;
-            Log($"VAR: {syntax.Identifier.Name} = {value}");
+            _logger.Log($"VAR: {syntax.Identifier.Name} = {value}");
             _symbolTable.AddSymbol(syntax.Identifier.Name, value);
             return value;
         }
 
         public override ProgValue Visit(BlockSyntax syntax)
         {
-            Log("BLOCK BEGIN");
+            _logger.Log("BLOCK BEGIN");
             _symbolTable.EnterScope();
-            _indentationLevel += 1;
+            _logger.Indent();
             foreach (var statement in syntax.Statements)
                 statement.Accept(this);
-            _indentationLevel -= 1;
+            _logger.Unindent();
             _symbolTable.LeaveScope();
-            Log("BLOCK END");
+            _logger.Log("BLOCK END");
             return NoneValue.Value;
         }
 
         public override ProgValue Visit(IfStatementSyntax syntax)
         {
-            Log("IF BEGIN");
+            _logger.Log("IF BEGIN");
             var value = syntax.Condition.Accept(this);
             if (value is BooleanValue b && b.Value)
                 syntax.ThenStatement.Accept(this);
             else
                 syntax.ElseStatement?.Accept(this);
-            Log("IF END");
+            _logger.Log("IF END");
             return NoneValue.Value;
         }
 
         public override ProgValue Visit(WhileStatementSyntax syntax)
         {
-            Log("WHILE BEGIN");
+            _logger.Log("WHILE BEGIN");
             while (true)
             {
                 var value = syntax.Condition.Accept(this);
@@ -74,7 +81,7 @@ namespace Prog
                 else
                     break;
             }
-            Log("WHILE END");
+            _logger.Log("WHILE END");
             return NoneValue.Value;
         }
 
@@ -85,11 +92,11 @@ namespace Prog
 
         public override ProgValue Visit(BinaryExpressionSyntax syntax)
         {
-            Log($"BINARY: {syntax.OperatorToken}");
-            _indentationLevel += 1;
+            _logger.Log($"BINARY: {syntax.OperatorToken}");
+            _logger.Indent();
             var leftOperand = syntax.Left.Accept(this);
             var rightOperand = syntax.Right.Accept(this);
-            _indentationLevel -= 1;
+            _logger.Unindent();
             return syntax.OperatorToken.Value switch
             {
                 "+" => new NumberValue((leftOperand as NumberValue) + (rightOperand as NumberValue)),
@@ -120,10 +127,10 @@ namespace Prog
 
         public override ProgValue Visit(UnaryExpressionSyntax syntax)
         {
-            Log($"UNARY: {syntax.OperatorToken}");
-            _indentationLevel += 1;
+            _logger.Log($"UNARY: {syntax.OperatorToken}");
+            _logger.Indent();
             var operandValue = syntax.Operand.Accept(this);
-            _indentationLevel -= 1;
+            _logger.Unindent();
             return syntax.OperatorToken.Value switch
             {
                 "+" => operandValue,
@@ -135,7 +142,7 @@ namespace Prog
 
         public override ProgValue Visit(LiteralExpressionSyntax syntax)
         {
-            Log($"LITERAL: {syntax.Token.Value}");
+            _logger.Log($"LITERAL: {syntax.Token.Value}");
             return syntax.Token.Value switch
             {
                 "none" => NoneValue.Value,
@@ -148,15 +155,15 @@ namespace Prog
 
         public override ProgValue Visit(IdentifierNameSyntax syntax)
         {
-            var value = _symbolTable.FindSymbol(syntax.Name)?.Value;  // @todo
-            Log($"ID: {syntax.Name} = {value}");
+            var value = _symbolTable.FindSymbol(syntax.Name)?.Value;
+            _logger.Log($"ID: {syntax.Name} = {value}");
             return value;
         }
 
         public override ProgValue Visit(InvocationExpressionSyntax syntax)
         {
             var arguments = syntax.ArgumentList.Arguments.Select(a => a.Accept(this)).ToArray();
-            Log($"INVOCATION: {syntax.IdentifierName.Name}, {arguments.Length}");
+            _logger.Log($"INVOCATION: {syntax.IdentifierName.Name}, {arguments.Length}");
             if (!Lang.Functions.TryGetValue(syntax.IdentifierName.Name, out var function))
                 throw new Exception($"Undefined function `{syntax.IdentifierName.Name}`.");
             return function.Call(arguments);

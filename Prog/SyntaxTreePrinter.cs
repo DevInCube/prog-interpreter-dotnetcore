@@ -34,23 +34,11 @@ namespace Prog
                 Console.Write("├─");
                 newIndent = indent + "│◦";
             }
-            Console.Write($"{ GetValue()}\n");
+            Console.Write($"{node}\n");
             for (var i = 0; i < node.Children.Count; i++)
             {
                 var child = node.Children[i];
                 PrintPretty(child, newIndent, false, i == node.Children.Count - 1);
-            }
-
-            string GetValue()
-            {
-                return node switch
-                {
-                    var _ when node is IdentifierNameSyntax idName => idName.Name,
-                    var _ when node is UnaryExpressionSyntax uexpr => uexpr.OperatorToken.Value,
-                    var _ when node is BinaryExpressionSyntax bexpr => bexpr.OperatorToken.Value,
-                    var _ when node is LiteralExpressionSyntax literal => literal.Token.Value,
-                    _ => node.GetType().ToString(),
-                };
             }
         }
     }

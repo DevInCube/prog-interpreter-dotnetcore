@@ -1,20 +1,21 @@
 # prog-interpreter-dotnetcore
+
 An educational interpreter for custom Prog language written in .NET Core
 
-# Test
+## Build
 
-```
-dotnet test
-```
-
-# Build
-
-```
+```sh
 dotnet publish
 ```
 
-# Run
+## Test
 
+```sh
+dotnet test
 ```
-./Prog/bin/Debug/netcoreapp3.1/publish/Prog ./Prog/data/main.prog
+
+## Run
+
+```sh
+dotnet run --project ./Prog ./Prog/data/main.prog
 ```

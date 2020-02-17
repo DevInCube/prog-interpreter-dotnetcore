@@ -4,40 +4,6 @@ using System;
 
 namespace Prog
 {
-    public class Variable
-    {
-        public string Name { get; }
-        public ProgValue Value { get; set; }
-
-        public Variable(string name, ProgValue value = null)
-        {
-            this.Name = name;
-            this.Value = value;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Variable variable &&
-                   Name == variable.Name;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Name);
-        }
-    }
-
-    public class SymbolTable
-    {
-        private Stack<HashSet<Variable>> scopes = new Stack<HashSet<Variable>>();
-
-        public void EnterScope() => scopes.Push(new HashSet<Variable>());
-        public void LeaveScope() => scopes.Pop();
-        public Variable FindSymbol(string symbol) => scopes.LastOrDefault(x => x.Any(t => t.Name == symbol))?.FirstOrDefault(t => t.Name == symbol);
-        public void AddSymbol(string symbol, ProgValue value) => scopes.Peek().Add(new Variable(symbol, value));
-        public bool CheckScope(string symbol) => scopes.Peek().Any(x => x.Name == symbol);
-    }
-
     public class Parser
     {
         private readonly IList<Token> _tokens;
@@ -67,7 +33,7 @@ namespace Prog
                     return true;
                 Advance();
             }
-            return _index != _tokens.Count;
+            return HasNext;
         }
 
         private Token Accept(TokenType type)
@@ -133,16 +99,11 @@ namespace Prog
         BlockSyntax BlockStatement()
         {
             if (Accept("{") == null) return null;
-            var parent = new BlockSyntax();
-            while (true)
-            {
-                if (Statement() is var statement && statement != null)
-                    parent.Children.Add(statement);
-                else
-                    break;
-            }
+            var block = new BlockSyntax();
+            while (Statement() is var statement && statement != null)
+                block.Children.Add(statement);
             Expect("}");
-            return parent;
+            return block;
         }
 
         IfStatementSyntax IfStatement()
@@ -195,28 +156,31 @@ namespace Prog
         ProgramSyntax Program()
         {
             var program = new ProgramSyntax();
-            while (true)
-            {
-                if (Statement() is var statement && statement != null)
-                    program.Children.Add(statement);
-                else
-                    break;
-            }
+            while (Statement() is var statement && statement != null)
+                program.Children.Add(statement);
             return program;
         }
         ExpressionSyntax Expression() => Assignment();
-        ExpressionSyntax Assignment()
-            => BinaryOperations(Lang.OperatorsTable.Where(x => x.Arity == OperatorArity.Binary).Reverse().ToArray().GroupBy(x => x.Priority).Select(x => x.ToArray()).ToArray());
-        ExpressionSyntax BinaryOperations(OperatorInfo[][] operatorsTable)
+        ExpressionSyntax Assignment() => BinaryOperations();
+
+        private static OperatorInfo[][] PrioritizedBinaryOperators
+            = Lang.OperatorsTable
+                .Where(x => x.Arity == OperatorArity.Binary)
+                .Reverse()
+                .ToArray()
+                .GroupBy(x => x.Priority)
+                .Select(x => x.ToArray())
+                .ToArray();
+        ExpressionSyntax BinaryOperations()
         {
             return BinaryRecur();
             //
             ExpressionSyntax BinaryRecur(int i = 0)
             {
                 Func<ExpressionSyntax> nextOperation = () => BinaryRecur(i + 1);
-                if (i == operatorsTable.Length - 1)
+                if (i == PrioritizedBinaryOperators.Length - 1)
                     nextOperation = UnaryOperation;
-                return BinaryOperation(operatorsTable[i], nextOperation);
+                return BinaryOperation(PrioritizedBinaryOperators[i], nextOperation);
             }
         }
         ExpressionSyntax BinaryOperation(OperatorInfo[] operators, Func<ExpressionSyntax> nextOperation)
@@ -262,7 +226,7 @@ namespace Prog
         ExpressionSyntax UnaryOperation()
         {
             var operatorToken = Accept(TokenType.Operator);
-            var primitiveTree = Primitive();
+            var primitiveTree = PrimaryOperation();
             if (operatorToken == null && primitiveTree == null) return null;
             if (operatorToken != null)
             {
@@ -274,7 +238,7 @@ namespace Prog
             }
             return primitiveTree;
         }
-        ExpressionSyntax Primitive()
+        ExpressionSyntax PrimaryOperation()
         {
             if (Accept(TokenType.Identifier) is var token && token != null)
             {
@@ -292,21 +256,18 @@ namespace Prog
             }
             if ((token = Accept(TokenType.Literal)) != null)
                 return new LiteralExpressionSyntax(token);
-            return null;  // this was not a primitive
+            return null;  // this was not a primary operation
         }
         ArgumentListSyntax ArgumentList()
         {
             if (Accept("(") == null) return null;
             var argsTree = new ArgumentListSyntax();
             bool closed = false;
-            while (Expression() is var arg && arg != null)
+            while (Expression() is var arg && arg != null && !closed)
             {
                 argsTree.Children.Add(arg);
                 if (Accept(")") != null)
-                {
                     closed = true;
-                    break;
-                }
                 else
                     Expect(",");
             }
