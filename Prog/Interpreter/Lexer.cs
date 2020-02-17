@@ -45,6 +45,7 @@ namespace Prog
                 _ => ReadOperator() ?? throw new Exception("Lexical error")
             };
         }
+        
         private Token ReadSpaces()
         {
             _lexeme.Clear();
@@ -55,6 +56,7 @@ namespace Prog
             }
             return new Token(TokenType.Whitespace, _lexeme.ToString());
         }
+
         private Token ReadWord()
         {
             _lexeme.Clear();
@@ -73,6 +75,7 @@ namespace Prog
             };
             return new Token(type, lexemeStr);
         }
+
         private Token ReadNumber()
         {
             _lexeme.Clear();
@@ -89,6 +92,7 @@ namespace Prog
                 throw new Exception("Fractional part expected");
             return new Token(TokenType.Literal, _lexeme.ToString());
         }
+
         private Token ReadString()
         {
             // with no escape-sequences
@@ -104,6 +108,7 @@ namespace Prog
             Advance();  // skip end quotes
             return new Token(TokenType.Literal, _lexeme.Append("\"").ToString());
         }
+
         private Token ReadLineComment()
         {
             _lexeme.Clear().Append("//");
@@ -115,6 +120,7 @@ namespace Prog
             }
             return new Token(TokenType.Comment, _lexeme.ToString());
         }
+
         private Token ReadSeparator()
         {
             var _lexeme = Current.ToString();
