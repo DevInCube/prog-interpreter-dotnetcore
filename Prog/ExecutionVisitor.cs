@@ -3,22 +3,6 @@ using System;
 
 namespace Prog
 {
-    public sealed class ExecutionLogger
-    {
-        private int _indentationLevel = 0;
-        public bool EnableLog { get; set; }
-
-        public void Indent() => _indentationLevel += 1;
-        public void Unindent() => _indentationLevel -= 1;
-
-        public void Log(string message)
-        {
-            if (!EnableLog) return;
-            for (int i = 0; i < _indentationLevel; i++)
-                Console.Write("  ");
-            Console.WriteLine(message);
-        }
-    }
     public class ExecutionVisitor : SyntaxVisitor<ProgValue>
     {
         private readonly SymbolTable _symbolTable = new SymbolTable();
@@ -73,14 +57,8 @@ namespace Prog
         public override ProgValue Visit(WhileStatementSyntax syntax)
         {
             _logger.Log("WHILE BEGIN");
-            while (true)
-            {
-                var value = syntax.Condition.Accept(this);
-                if (value is BooleanValue bv && bv.Value)
-                    syntax.Statement.Accept(this);
-                else
-                    break;
-            }
+            while (syntax.Condition.Accept(this) is BooleanValue bv && bv.Value)
+                 syntax.Statement.Accept(this);
             _logger.Log("WHILE END");
             return NoneValue.Value;
         }
