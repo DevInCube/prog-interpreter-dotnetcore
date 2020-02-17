@@ -16,7 +16,7 @@ namespace Prog
         public override bool Equals(object obj)
         {
             return obj is Variable variable &&
-                   Name == variable.Name;
+                    Name == variable.Name;
         }
 
         public override int GetHashCode()
