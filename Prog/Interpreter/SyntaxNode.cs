@@ -93,23 +93,6 @@ namespace Prog
         }
     }
 
-    public sealed class IdentifierNameSyntax : ExpressionSyntax
-    {
-        public IdentifierNameSyntax(string name)
-        {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-        }
-
-        public string Name { get; }
-
-        public override string ToString() => Name;
-
-        public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
-        {
-            return visitor.Visit(this);
-        }
-    }
-
     public abstract class ExpressionSyntax : SyntaxNode
     {
     }
@@ -123,35 +106,6 @@ namespace Prog
         }
 
         public override string ToString() => this.Token.Value;
-
-        public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
-        {
-            return visitor.Visit(this);
-        }
-    }
-
-    public sealed class InvocationExpressionSyntax : ExpressionSyntax
-    {
-        public InvocationExpressionSyntax(
-            IdentifierNameSyntax identifierName,
-            ArgumentListSyntax argumentList)
-        {
-            Children.Add(identifierName);
-            Children.Add(argumentList);
-        }
-
-        public IdentifierNameSyntax IdentifierName => (IdentifierNameSyntax)Children[0];
-        public ArgumentListSyntax ArgumentList => Children.Count > 1 ? (ArgumentListSyntax)Children[1] : null;
-
-        public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
-        {
-            return visitor.Visit(this);
-        }
-    }
-
-    public sealed class ArgumentListSyntax : SyntaxNode
-    {
-        public List<ExpressionSyntax> Arguments => Children.Cast<ExpressionSyntax>().ToList();
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -194,6 +148,52 @@ namespace Prog
         public ExpressionSyntax Right => (ExpressionSyntax)Children[1];
 
         public override string ToString() => this.OperatorToken.Value;
+
+        public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
+        {
+            return visitor.Visit(this);
+        }
+    }
+
+    public sealed class IdentifierNameSyntax : ExpressionSyntax
+    {
+        public IdentifierNameSyntax(string name)
+        {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+        }
+
+        public string Name { get; }
+
+        public override string ToString() => Name;
+
+        public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
+        {
+            return visitor.Visit(this);
+        }
+    }
+
+    public sealed class InvocationExpressionSyntax : ExpressionSyntax
+    {
+        public InvocationExpressionSyntax(
+            IdentifierNameSyntax identifierName,
+            ArgumentListSyntax argumentList)
+        {
+            Children.Add(identifierName);
+            Children.Add(argumentList);
+        }
+
+        public IdentifierNameSyntax IdentifierName => (IdentifierNameSyntax)Children[0];
+        public ArgumentListSyntax ArgumentList => Children.Count > 1 ? (ArgumentListSyntax)Children[1] : null;
+
+        public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
+        {
+            return visitor.Visit(this);
+        }
+    }
+
+    public sealed class ArgumentListSyntax : SyntaxNode
+    {
+        public List<ExpressionSyntax> Arguments => Children.Cast<ExpressionSyntax>().ToList();
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {

@@ -6,21 +6,23 @@ namespace Prog
 {
     public class Parser
     {
-        private readonly IList<Token> _tokens;
+        private IList<Token> _tokens;
         private int _index = 0;
 
         private bool HasNext => _index != _tokens.Count;
         private Token Current => _tokens[_index];
         private void Advance() => _index += 1;
 
-        public Parser(Lexer lexer)
+        private Parser()
         {
-            this._tokens = lexer.Analyze().ToArray();
         }
 
-        public ProgramSyntax Parse()
+        public static Parser Instance { get; } = new Parser();
+
+        public ProgramSyntax Parse(IList<Token> tokens)
         {
             this._index = 0;
+            this._tokens = tokens;
             return Program();
         }
 

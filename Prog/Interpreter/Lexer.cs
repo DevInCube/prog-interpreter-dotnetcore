@@ -7,14 +7,15 @@ namespace Prog
 {
     public class Lexer
     {
-        private readonly string _input;
-        private int _index = 0;
+        private string _input;
+        private int _index;
         private readonly StringBuilder _lexeme = new StringBuilder();
 
-        public Lexer(string input)
+        private Lexer()
         {
-            this._input = input;
         }
+
+        public static Lexer Instance { get; } = new Lexer();
 
         private bool HasCurrent => _index < _input.Length;
         private char Current => _input[_index];
@@ -22,8 +23,9 @@ namespace Prog
         private char Next => _input[_index + 1];
         private void Advance(int k = 1) => _index += k;
 
-        public IEnumerable<Token> Analyze()
+        public IEnumerable<Token> Analyze(string input)
         {
+            this._input = input;
             this._index = 0;
             while (HasCurrent)
                 yield return ReadToken();
@@ -45,7 +47,7 @@ namespace Prog
                 _ => ReadOperator() ?? throw new Exception("Lexical error")
             };
         }
-        
+
         private Token ReadSpaces()
         {
             _lexeme.Clear();
