@@ -6,24 +6,22 @@ namespace Prog
 {
     public class Parser
     {
-        private IList<Token> _tokens;
-        private int _index = 0;
+        private readonly IList<Token> _tokens;
+        private int _index;
 
         private bool HasNext => _index != _tokens.Count;
         private Token Current => _tokens[_index];
         private void Advance() => _index += 1;
 
-        private Parser()
+        private Parser(IList<Token> tokens)
         {
+            this._tokens = tokens;
+            this._index = 0;
         }
 
-        public static Parser Instance { get; } = new Parser();
-
-        public ProgramSyntax Parse(IList<Token> tokens)
+        public static ProgramSyntax Parse(IList<Token> tokens)
         {
-            this._index = 0;
-            this._tokens = tokens;
-            return Program();
+            return new Parser(tokens).Program();
         }
 
         private bool SkipTokens()

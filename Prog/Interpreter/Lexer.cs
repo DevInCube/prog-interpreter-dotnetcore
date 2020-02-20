@@ -7,15 +7,15 @@ namespace Prog
 {
     public class Lexer
     {
-        private string _input;
+        private readonly string _input;
         private int _index;
         private readonly StringBuilder _lexeme = new StringBuilder();
 
-        private Lexer()
+        private Lexer(string input)
         {
+            this._input = input;
+            this._index = 0;
         }
-
-        public static Lexer Instance { get; } = new Lexer();
 
         private bool HasCurrent => _index < _input.Length;
         private char Current => _input[_index];
@@ -23,12 +23,15 @@ namespace Prog
         private char Next => _input[_index + 1];
         private void Advance(int k = 1) => _index += k;
 
-        public IEnumerable<Token> Analyze(string input)
+        private IEnumerable<Token> Analyze()
         {
-            this._input = input;
-            this._index = 0;
             while (HasCurrent)
                 yield return ReadToken();
+        }
+
+        public static IEnumerable<Token> Analyze(string input)
+        {
+            return new Lexer(input).Analyze();
         }
 
         private Token ReadToken()

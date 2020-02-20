@@ -11,24 +11,24 @@ namespace Prog.Tests
         public void Parse_InputIncompleteUnary_Exception()
         {
             const string text = "+";
-            var tokens = Lexer.Instance.Analyze(text).ToList();
-            Assert.Catch<Exception>(() => Parser.Instance.Parse(tokens));
+            var tokens = Lexer.Analyze(text).ToList();
+            Assert.Catch<Exception>(() => Parser.Parse(tokens));
         }
 
         [Test]
         public void Parse_InputIncompleteBinary_Exception()
         {
             const string text = "2+";
-            var tokens = Lexer.Instance.Analyze(text).ToList();
-            Assert.Catch<Exception>(() => Parser.Instance.Parse(tokens));
+            var tokens = Lexer.Analyze(text).ToList();
+            Assert.Catch<Exception>(() => Parser.Parse(tokens));
         }
 
         [Test]
         public void Parse_InputTwoBinary_Exception()
         {
             const string text = "1*/2";
-            var tokens = Lexer.Instance.Analyze(text).ToList();
-            Assert.Catch<Exception>(() => Parser.Instance.Parse(tokens));
+            var tokens = Lexer.Analyze(text).ToList();
+            Assert.Catch<Exception>(() => Parser.Parse(tokens));
         }
 
         [TestCase("let")]
@@ -40,8 +40,8 @@ namespace Prog.Tests
         [TestCase("let let")]
         public void Parse_InputIncompleteVarDecl_Exception(string text)
         {
-            var tokens = Lexer.Instance.Analyze(text).ToList();
-            Assert.Catch<Exception>(() => Parser.Instance.Parse(tokens));
+            var tokens = Lexer.Analyze(text).ToList();
+            Assert.Catch<Exception>(() => Parser.Parse(tokens));
         }
 
         [TestCase("if")]
@@ -52,8 +52,8 @@ namespace Prog.Tests
         [TestCase("if (true) {} else")]
         public void Parse_InputIncompleteIf_Exception(string text)
         {
-            var tokens = Lexer.Instance.Analyze(text).ToList();
-            Assert.Catch<Exception>(() => Parser.Instance.Parse(tokens));
+            var tokens = Lexer.Analyze(text).ToList();
+            Assert.Catch<Exception>(() => Parser.Parse(tokens));
         }
 
         [TestCase("while")]
@@ -63,23 +63,23 @@ namespace Prog.Tests
         [TestCase("while (1)")]
         public void Parse_InputIncompleteWhile_Exception(string text)
         {
-            var tokens = Lexer.Instance.Analyze(text).ToList();
-            Assert.Catch<Exception>(() => Parser.Instance.Parse(tokens));
+            var tokens = Lexer.Analyze(text).ToList();
+            Assert.Catch<Exception>(() => Parser.Parse(tokens));
         }
 
         [TestCase("{")]
         public void Parse_InputIncompleteBlock_Exception(string text)
         {
-            var tokens = Lexer.Instance.Analyze(text).ToList();
-            Assert.Catch<Exception>(() => Parser.Instance.Parse(tokens));
+            var tokens = Lexer.Analyze(text).ToList();
+            Assert.Catch<Exception>(() => Parser.Parse(tokens));
         }
 
         [TestCase("2 - 2 - 2")]
         [TestCase("2 / 2 / 2")]
         public void Parse_InputSameOperatorsExpression_AssociativityLeftToRight(string text)
         {
-            var tokens = Lexer.Instance.Analyze(text).ToList();
-            var tree = Parser.Instance.Parse(tokens);
+            var tokens = Lexer.Analyze(text).ToList();
+            var tree = Parser.Parse(tokens);
             Assert.IsTrue(tree is ProgramSyntax);
             Assert.AreEqual(1, tree.Children.Count);
             Assert.AreEqual(1, tree.Children[0].Children.Count);
@@ -89,8 +89,8 @@ namespace Prog.Tests
         [TestCase("a = b = c")]
         public void Parse_InputSameOperatorsExpression_AssociativityRightToLeft(string text)
         {
-            var tokens = Lexer.Instance.Analyze(text).ToList();
-            var tree = Parser.Instance.Parse(tokens);
+            var tokens = Lexer.Analyze(text).ToList();
+            var tree = Parser.Parse(tokens);
             Assert.IsTrue(tree is ProgramSyntax);
             Assert.AreEqual(1, tree.Children.Count);
             Assert.AreEqual(1, tree.Children[0].Children.Count);
@@ -110,8 +110,8 @@ namespace Prog.Tests
         [TestCase("||3")]
         public void Parse_InputInvalidUnaryOperator_Exception(string text)
         {
-            var tokens = Lexer.Instance.Analyze(text).ToList();
-            Assert.Catch<Exception>(() => Parser.Instance.Parse(tokens));
+            var tokens = Lexer.Analyze(text).ToList();
+            Assert.Catch<Exception>(() => Parser.Parse(tokens));
         }
     }
 }

@@ -15,14 +15,14 @@ namespace Prog
             }
             var text = File.ReadAllText(args[0]);
             // lexical analysis
-            var tokens = Lexer.Instance.Analyze(text).ToList();
+            var tokens = Lexer.Analyze(text).ToList();
             var filteredTokens = tokens
                 .Where(x => x.Type != TokenType.Comment && x.Type != TokenType.Whitespace)
                 .ToList();
             foreach (var token in filteredTokens)
                 Console.Write($"({token.Type}:`{token.Value}`)");
             // parse
-            var syntaxTree = Parser.Instance.Parse(tokens);
+            var syntaxTree = Parser.Parse(tokens);
             Console.WriteLine();
             SyntaxTreePrinter.PrintParseTree(syntaxTree);
             // execution
