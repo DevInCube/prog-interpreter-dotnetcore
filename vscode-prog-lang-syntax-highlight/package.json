@@ -1,0 +1,29 @@
+{
+    "name": "prog-lang",
+    "displayName": "Prog Lang",
+    "description": "Syntax highlighting for Prog Language",
+    "version": "0.0.1",
+    "publisher": "devincube",
+    "scripts": {
+        "build": "vsce package"
+    },
+    "engines": {
+        "vscode": "^1.41.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "prog",
+            "aliases": ["Prog", "prog"],
+            "extensions": [".prog"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "prog",
+            "scopeName": "source.prog",
+            "path": "./syntaxes/prog.tmLanguage.json"
+        }]
+    }
+}
