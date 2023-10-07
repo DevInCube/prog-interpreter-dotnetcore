@@ -19,7 +19,7 @@
             return HashCode.Combine(Value);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is BooleanValue value &&
                 Value == value.Value;
