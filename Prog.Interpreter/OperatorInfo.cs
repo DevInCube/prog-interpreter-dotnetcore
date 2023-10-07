@@ -1,16 +1,5 @@
 namespace Prog
 {
-    public enum OperatorArity
-    {
-        Unary,
-        Binary,
-    }
-
-    public enum OperatorAssociativity
-    {
-        LeftToRight,
-        RightToLeft,
-    }
     public class OperatorInfo
     {
         public string Lexeme { get; }

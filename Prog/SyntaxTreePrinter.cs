@@ -34,6 +34,7 @@ namespace Prog
                 Console.Write("├─");
                 newIndent = indent + "│◦";
             }
+
             Console.Write($"{node}\n");
             for (var i = 0; i < node.Children.Count; i++)
             {
