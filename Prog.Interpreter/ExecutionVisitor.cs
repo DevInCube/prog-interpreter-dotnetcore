@@ -112,8 +112,8 @@ namespace Prog
             return syntax.OperatorToken.Value switch
             {
                 "+" => operandValue,
-                "-" => new NumberValue(-(operandValue as NumberValue)),
-                "!" => new BooleanValue(!(operandValue as BooleanValue)),
+                "-" => new NumberValue((operandValue is NumberValue number) ? -number : throw new InvalidOperationException("Expected a number.")),
+                "!" => new BooleanValue((operandValue is BooleanValue boolean) ? !boolean : throw new InvalidOperationException("Expected a boolean.")),
                 _ => throw new Exception("Unsupported unary operator."),
             };
         }
