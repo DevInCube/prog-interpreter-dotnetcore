@@ -7,9 +7,13 @@ namespace Prog
         public static void PrintParseTree(ProgramSyntax syntaxTree)
         {
             if (syntaxTree != null)
-                PrintPretty(syntaxTree, "", true, true);
+            {
+                PrintPretty(syntaxTree, string.Empty, true, true);
+            }
             else
+            {
                 Console.WriteLine("(empty)");
+            }
         }
 
         // adapted from: https://stackoverflow.com/a/1649223
@@ -26,7 +30,7 @@ namespace Prog
                 }
                 else
                 {
-                    newIndent = indent + "";
+                    newIndent = indent + string.Empty;
                 }
             }
             else

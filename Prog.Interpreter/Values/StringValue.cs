@@ -1,5 +1,3 @@
-using System;
-
 namespace Prog
 {
     public class StringValue : ProgValue
@@ -8,10 +6,11 @@ namespace Prog
 
         public StringValue(string value)
         {
-            this.Value = value;
+            Value = value;
         }
 
         public static implicit operator string(StringValue d) => d.Value;
+
         public static implicit operator StringValue(string b) => new StringValue(b);
 
         public override string ToString() => Value.ToString();

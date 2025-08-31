@@ -1,16 +1,15 @@
-using System;
-
 namespace Prog
 {
     public class Variable
     {
         public string Name { get; }
+
         public ProgValue Value { get; set; }
 
-        public Variable(string name, ProgValue value = null)
+        public Variable(string name, ProgValue value)
         {
-            this.Name = name;
-            this.Value = value;
+            Name = name;
+            Value = value;
         }
 
         public override bool Equals(object? obj)

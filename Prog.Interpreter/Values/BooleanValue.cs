@@ -6,10 +6,11 @@
 
         public BooleanValue(bool value)
         {
-            this.Value = value;
+            Value = value;
         }
 
         public static implicit operator bool(BooleanValue d) => d.Value;
+
         public static implicit operator BooleanValue(bool b) => new BooleanValue(b);
 
         public override string ToString() => Value.ToString();

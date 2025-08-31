@@ -7,17 +7,19 @@ namespace Prog
     public class Token
     {
         public TokenType Type { get; }
+
         // public int Line { get; set; }
         // public int Position { get; set; }
-        public string Value { get; }  // lexeme
+        public string Value { get; } // lexeme
 
         public int StartPosition { get; set; }
+
         public int EndPosition { get; set; }
 
-        public Token(TokenType type, string value = null)
+        public Token(TokenType type, string value)
         {
-            this.Type = type;
-            this.Value = value;
+            Type = type;
+            Value = value;
         }
 
         public override string ToString()

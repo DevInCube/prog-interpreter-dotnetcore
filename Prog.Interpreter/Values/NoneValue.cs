@@ -2,7 +2,9 @@
 {
     public class NoneValue : ProgValue
     {
-        private NoneValue() { }
+        private NoneValue()
+        {
+        }
 
         public static NoneValue Value { get; } = new NoneValue();
 

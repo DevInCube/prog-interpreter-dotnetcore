@@ -1,6 +1,3 @@
-using System.Linq;
-using System;
-
 namespace Prog
 {
     public class ExecutionVisitor : SyntaxVisitor<ProgValue>
@@ -14,7 +11,10 @@ namespace Prog
             _symbolTable.EnterScope();
             _logger.Indent();
             foreach (var statement in syntax.Statements)
+            {
                 statement.Accept(this);
+            }
+
             _logger.Unindent();
             _symbolTable.LeaveScope();
             _logger.Log("PROGRAM END");
@@ -164,7 +164,10 @@ namespace Prog
             var arguments = syntax.ArgumentList.Arguments.Select(a => a.Accept(this)).ToArray();
             _logger.Log($"INVOCATION: {syntax.IdentifierName.Name}, {arguments.Length}");
             if (!Lang.Functions.TryGetValue(syntax.IdentifierName.Name, out var function))
+            {
                 throw new Exception($"Undefined function `{syntax.IdentifierName.Name}`.");
+            }
+
             return function.Call(arguments);
         }
     }

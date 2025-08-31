@@ -1,4 +1,6 @@
 ﻿namespace Prog
 {
-    public abstract class ProgValue { }
+    public abstract class ProgValue
+    {
+    }
 }

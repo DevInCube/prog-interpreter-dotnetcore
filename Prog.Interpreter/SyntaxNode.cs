@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Prog
 {
     public abstract class SyntaxNode
@@ -9,7 +5,7 @@ namespace Prog
         // public SyntaxNode Parent { get; }
         public List<SyntaxNode> Children { get; } = new List<SyntaxNode>();
 
-        public override string ToString() => this.GetType().ToString();
+        public override string ToString() => GetType().ToString();
 
         public abstract TResult Accept<TResult>(SyntaxVisitor<TResult> visitor);
     }
@@ -54,6 +50,7 @@ namespace Prog
             return visitor.Visit(this);
         }
     }
+
     public sealed class VariableDeclarationExpressionSyntax : ExpressionSyntax
     {
         public VariableDeclarationExpressionSyntax(IdentifierNameSyntax declarator)
@@ -74,7 +71,9 @@ namespace Prog
     public sealed class IfExpressionSyntax : ExpressionSyntax
     {
         public ExpressionSyntax Condition => (ExpressionSyntax)Children[0];
+
         public Statement ThenStatement => (Statement)Children[1];
+
         public Statement ElseStatement => Children.Count > 2 ? (Statement)Children[2] : null;
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
@@ -86,6 +85,7 @@ namespace Prog
     public sealed class WhileExpressionSyntax : ExpressionSyntax
     {
         public ExpressionSyntax Condition => (ExpressionSyntax)Children[0];
+
         public Statement Statement => (Statement)Children[1];
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
@@ -107,12 +107,13 @@ namespace Prog
     public sealed class LiteralExpressionSyntax : ExpressionSyntax
     {
         public Token Token { get; }
+
         public LiteralExpressionSyntax(Token token)
         {
-            this.Token = token;
+            Token = token;
         }
 
-        public override string ToString() => this.Token.Value;
+        public override string ToString() => Token.Value;
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -127,10 +128,12 @@ namespace Prog
             OperatorToken = token;
             Children.Add(expression);
         }
+
         public Token OperatorToken { get; }
+
         public ExpressionSyntax Operand => (ExpressionSyntax)Children.First();
 
-        public override string ToString() => this.OperatorToken.Value;
+        public override string ToString() => OperatorToken.Value;
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -151,10 +154,12 @@ namespace Prog
         }
 
         public Token OperatorToken { get; }
+
         public ExpressionSyntax Left => (ExpressionSyntax)Children[0];
+
         public ExpressionSyntax Right => (ExpressionSyntax)Children[1];
 
-        public override string ToString() => this.OperatorToken.Value;
+        public override string ToString() => OperatorToken.Value;
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -190,6 +195,7 @@ namespace Prog
         }
 
         public IdentifierNameSyntax IdentifierName => (IdentifierNameSyntax)Children[0];
+
         public ArgumentListSyntax ArgumentList => Children.Count > 1 ? (ArgumentListSyntax)Children[1] : null;
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)

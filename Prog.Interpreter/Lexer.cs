@@ -1,26 +1,34 @@
-using System.Collections.Generic;
-using System.Linq;
-using System;
 using System.Text;
 
 namespace Prog
 {
     public class Lexer
     {
+        private static readonly string[] s_operators = [.. Lang.OperatorsTable.Select(x => x.Lexeme).Distinct()];
+
         private readonly string _input;
+        private readonly StringBuilder _lexeme = new();
         private int _index;
-        private readonly StringBuilder _lexeme = new StringBuilder();
 
         private Lexer(string input)
         {
-            this._input = input;
-            this._index = 0;
+            _input = input;
+            _index = 0;
+        }
+
+        public static IEnumerable<Token> Analyze(string input)
+        {
+            return new Lexer(input).Analyze();
         }
 
         private bool HasCurrent => _index < _input.Length;
+
         private char Current => _input[_index];
+
         private bool HasNext => _index + 1 < _input.Length;
+
         private char Next => _input[_index + 1];
+
         private void Advance(int k = 1) => _index += k;
 
         private IEnumerable<Token> Analyze()
@@ -36,11 +44,6 @@ namespace Prog
             }
         }
 
-        public static IEnumerable<Token> Analyze(string input)
-        {
-            return new Lexer(input).Analyze();
-        }
-
         private Token ReadToken()
         {
             _lexeme.Clear();
@@ -49,12 +52,12 @@ namespace Prog
                 var ws when char.IsWhiteSpace(ws) => ReadSpaces(),
                 var d when char.IsDigit(d) => ReadNumber(),
                 '"' => ReadString(),
-                var w when (w == '_' || char.IsLetter(w)) => ReadWord(),
-                var sep when (Lang.Separators.Contains(sep.ToString()))
+                var w when w == '_' || char.IsLetter(w) => ReadWord(),
+                var sep when Lang.Separators.Contains(sep.ToString())
                     => ReadSeparator(),
-                var com when (com == '/' && HasNext && Next == '/')
+                var com when com == '/' && HasNext && Next == '/'
                     => ReadLineComment(),
-                _ => ReadOperator() ?? throw new Exception("Lexical error")
+                _ => ReadOperator() ?? throw new Exception("Lexical error"),
             };
         }
 
@@ -66,6 +69,7 @@ namespace Prog
                 _lexeme.Append(Current);
                 Advance();
             }
+
             return new Token(TokenType.Whitespace, _lexeme.ToString());
         }
 
@@ -78,12 +82,13 @@ namespace Prog
                 _lexeme.Append(Current);
                 Advance();
             }
+
             var lexemeStr = _lexeme.ToString();
             var type = lexemeStr switch
             {
-                var x when (x == "true" || x == "false" || x == "none") => TokenType.Literal,
+                var x when x == "true" || x == "false" || x == "none" => TokenType.Literal,
                 var x when Lang.Keywords.Contains(x) => TokenType.Keyword,
-                _ => TokenType.Identifier
+                _ => TokenType.Identifier,
             };
             return new Token(type, lexemeStr);
         }
@@ -97,11 +102,18 @@ namespace Prog
             {
                 _lexeme.Append(Current);
                 if (Current == '.')
+                {
                     hadDecimalPoint = true;
+                }
+
                 Advance();
             }
+
             if (hadDecimalPoint && _lexeme[_lexeme.Length - 1] == '.')
+            {
                 throw new Exception("Fractional part expected");
+            }
+
             return new Token(TokenType.Literal, _lexeme.ToString());
         }
 
@@ -115,8 +127,12 @@ namespace Prog
                 _lexeme.Append(Current);
                 Advance();
             }
+
             if (!HasCurrent)
+            {
                 throw new Exception("Expected end of string");
+            }
+
             Advance();  // skip end quotes
             return new Token(TokenType.Literal, _lexeme.Append("\"").ToString());
         }
@@ -130,34 +146,44 @@ namespace Prog
                 _lexeme.Append(Current);
                 Advance();
             }
+
             return new Token(TokenType.Comment, _lexeme.ToString());
         }
 
         private Token ReadSeparator()
         {
-            var _lexeme = Current.ToString();
+            var lexeme = Current.ToString();
             Advance();
-            return new Token(TokenType.Separator, _lexeme);
+            return new Token(TokenType.Separator, lexeme);
         }
 
-        private static string[] _operators = Lang.OperatorsTable.Select(x => x.Lexeme).Distinct().ToArray();
-
-        private Token ReadOperator()
+        private Token? ReadOperator()
         {
             _lexeme.Clear();
-            string lastMatch = null;
+            string? lastMatch = null;
             while (HasCurrent)
             {
                 _lexeme.Append(Current);
                 var candidateStr = _lexeme.ToString();
-                if (!_operators.Any(x => x.StartsWith(candidateStr)))
+                if (!s_operators.Any(x => x.StartsWith(candidateStr)))
+                {
                     break;
+                }
+
                 lastMatch = candidateStr;
                 Advance();
             }
-            if (lastMatch == null) return null;
-            if (!_operators.Contains(lastMatch))
+
+            if (lastMatch == null)
+            {
+                return null;
+            }
+
+            if (!s_operators.Contains(lastMatch))
+            {
                 throw new Exception($"Unknown operator: {lastMatch}");
+            }
+
             return new Token(TokenType.Operator, lastMatch);
         }
     }

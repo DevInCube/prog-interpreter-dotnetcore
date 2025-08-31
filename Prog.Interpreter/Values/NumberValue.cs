@@ -6,10 +6,11 @@
 
         public NumberValue(double value)
         {
-            this.Value = value;
+            Value = value;
         }
 
         public static implicit operator double(NumberValue d) => d.Value;
+
         public static implicit operator NumberValue(double b) => new NumberValue(b);
 
         public override string ToString() => Value.ToString();
