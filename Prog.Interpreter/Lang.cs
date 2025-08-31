@@ -12,7 +12,7 @@ namespace Prog
             "while",
             "none",
             "true",
-            "false"
+            "false",
         };
 
         public static readonly string[] Separators = {
@@ -20,7 +20,8 @@ namespace Prog
             ")",
             "{",
             "}",
-            ","
+            ",",
+            ";",
         };
 
         public static readonly OperatorInfo[] OperatorsTable = {

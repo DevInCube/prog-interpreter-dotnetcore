@@ -3,8 +3,9 @@ namespace Prog
     public abstract class SyntaxVisitor<TResult>
     {
         public virtual TResult Visit(ProgramSyntax syntax) => default;
+        public virtual TResult Visit(EmptyStatement syntax) => default;
+        public virtual TResult Visit(BlockedStatement syntax) => default;
         public virtual TResult Visit(VariableDeclarationStatementSyntax syntax) => default;
-        public virtual TResult Visit(ExpressionStatementSyntax syntax) => default;
         public virtual TResult Visit(IfStatementSyntax syntax) => default;
         public virtual TResult Visit(WhileStatementSyntax syntax) => default;
         public virtual TResult Visit(BlockSyntax syntax) => default;

@@ -11,6 +11,9 @@ namespace Prog
         // public int Position { get; set; }
         public string Value { get; }  // lexeme
 
+        public int StartPosition { get; set; }
+        public int EndPosition { get; set; }
+
         public Token(TokenType type, string value = null)
         {
             this.Type = type;

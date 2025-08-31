@@ -21,6 +21,16 @@ namespace Prog
             return NoneValue.Value;
         }
 
+        public override ProgValue Visit(EmptyStatement syntax)
+        {
+            return NoneValue.Value;
+        }
+
+        public override ProgValue Visit(BlockedStatement syntax)
+        {
+            return syntax.Statement.Accept(this);
+        }
+
         public override ProgValue Visit(VariableDeclarationStatementSyntax syntax)
         {
             var value = syntax.Value?.Accept(this) ?? NoneValue.Value;
@@ -34,38 +44,47 @@ namespace Prog
             _logger.Log("BLOCK BEGIN");
             _symbolTable.EnterScope();
             _logger.Indent();
+            ProgValue lastValue = NoneValue.Value;
             foreach (var statement in syntax.Statements)
-                statement.Accept(this);
+            {
+                lastValue = statement.Accept(this);
+            }
+
             _logger.Unindent();
             _symbolTable.LeaveScope();
             _logger.Log("BLOCK END");
-            return NoneValue.Value;
+            return lastValue;
         }
 
         public override ProgValue Visit(IfStatementSyntax syntax)
         {
             _logger.Log("IF BEGIN");
             var value = syntax.Condition.Accept(this);
+            ProgValue returnValue = NoneValue.Value;
             if (value is BooleanValue b && b.Value)
-                syntax.ThenStatement.Accept(this);
-            else
-                syntax.ElseStatement?.Accept(this);
+            {
+                returnValue = syntax.ThenStatement.Accept(this);
+            }
+            else if (syntax.ElseStatement is not null)
+            {
+                returnValue = syntax.ElseStatement.Accept(this);
+            }
+
             _logger.Log("IF END");
-            return NoneValue.Value;
+            return returnValue;
         }
 
         public override ProgValue Visit(WhileStatementSyntax syntax)
         {
             _logger.Log("WHILE BEGIN");
+            ProgValue returnValue = NoneValue.Value;
             while (syntax.Condition.Accept(this) is BooleanValue bv && bv.Value)
-                 syntax.Statement.Accept(this);
-            _logger.Log("WHILE END");
-            return NoneValue.Value;
-        }
+            {
+                returnValue = syntax.Statement.Accept(this);
+            }
 
-        public override ProgValue Visit(ExpressionStatementSyntax syntax)
-        {
-            return syntax.Expression.Accept(this);
+            _logger.Log("WHILE END");
+            return returnValue;
         }
 
         public override ProgValue Visit(BinaryExpressionSyntax syntax)

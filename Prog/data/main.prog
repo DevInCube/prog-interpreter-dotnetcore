@@ -1,3 +1,24 @@
+{
+    let f1 = let f2 = 5;
+    print(f1 + f2);
+    print({13})
+
+    // Empty statement is just none
+    //let n = ;
+    //print("n = ", n, ;);
+
+    // This should fail because (none + number) is not defined
+    //1; + 2;
+
+    //print({13} + 1)
+    //print({4} + {5 + 6});
+}
+
+//{print({13} + 1)}
+//{13}
+//{13 + 1}
+//{let x}
+
 let a
 let b
 let c
@@ -8,6 +29,15 @@ let c
     let b = a + 1
     print("a and b ", a, b)
 }
+
+let x1 = { let a = 40 let b = 2 a + b }
+print(x1)
+
+print("true", if (true) 1 else 0)
+print("false", if (false) 1 else 0)
+
+let x = { let y = 40; let z = 2; y + z; }
+print("Last value = ", x)
 
 //a = b = c = 5
 print(a, b, c, 2 - 2 - 2, (2 - 2) - 2, 2 - (2 - 2))
@@ -29,4 +59,4 @@ else
    }
    print("sum of digits = ", sum)
 }
-
+;;;

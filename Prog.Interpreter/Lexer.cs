@@ -26,7 +26,14 @@ namespace Prog
         private IEnumerable<Token> Analyze()
         {
             while (HasCurrent)
-                yield return ReadToken();
+            {
+                var startPosition = _index;
+                var token = ReadToken();
+                var endPosition = _index;
+                token.StartPosition = startPosition;
+                token.EndPosition = endPosition;
+                yield return token;
+            }
         }
 
         public static IEnumerable<Token> Analyze(string input)
