@@ -109,7 +109,7 @@ namespace Prog
                 Advance();
             }
 
-            if (hadDecimalPoint && _lexeme[_lexeme.Length - 1] == '.')
+            if (hadDecimalPoint && _lexeme[^1] == '.')
             {
                 throw new Exception("Fractional part expected");
             }
@@ -120,7 +120,7 @@ namespace Prog
         private Token ReadString()
         {
             // with no escape-sequences
-            _lexeme.Clear().Append("\"");
+            _lexeme.Clear().Append('"');
             Advance();  // skip start quotes
             while (HasCurrent && Current != '"')
             {
@@ -134,7 +134,7 @@ namespace Prog
             }
 
             Advance();  // skip end quotes
-            return new Token(TokenType.Literal, _lexeme.Append("\"").ToString());
+            return new Token(TokenType.Literal, _lexeme.Append('"').ToString());
         }
 
         private Token ReadLineComment()

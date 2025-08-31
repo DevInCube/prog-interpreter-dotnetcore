@@ -16,14 +16,14 @@ namespace Prog
                 {
                     if (!typeof(ProgValue).IsAssignableFrom(type))
                     {
-                        throw new ArgumentOutOfRangeException("Parameter type should be ProgValue type");
+                        throw new ArgumentOutOfRangeException(nameof(argTypes), "Parameter type should be ProgValue type");
                     }
                 }
             }
 
             if (!typeof(ProgValue).IsAssignableFrom(resultType))
             {
-                throw new ArgumentOutOfRangeException("Result type should be ProgValue type");
+                throw new ArgumentOutOfRangeException(nameof(resultType), "Result type should be ProgValue type");
             }
 
             ArgumentTypes = argTypes;

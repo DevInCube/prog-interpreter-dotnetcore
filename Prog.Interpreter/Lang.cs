@@ -51,14 +51,14 @@ namespace Prog
                 new FunctionInfo(
                     [typeof(NumberValue)],
                     typeof(NumberValue),
-                    (ProgValue[] args) => (NumberValue)Math.Sin(args[0] as NumberValue))
+                    args => (NumberValue)Math.Sin(args[0] as NumberValue))
             },
             {
                 "floor",
                 new FunctionInfo(
                     [typeof(NumberValue)],
                     typeof(NumberValue),
-                    (ProgValue[] args) => (NumberValue)Math.Floor(args[0] as NumberValue))
+                    args => (NumberValue)Math.Floor(args[0] as NumberValue))
             },
             {
                 "print",

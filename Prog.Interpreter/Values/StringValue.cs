@@ -11,7 +11,7 @@ namespace Prog
 
         public static implicit operator string(StringValue d) => d.Value;
 
-        public static implicit operator StringValue(string b) => new StringValue(b);
+        public static implicit operator StringValue(string b) => new(b);
 
         public override string ToString() => Value.ToString();
 

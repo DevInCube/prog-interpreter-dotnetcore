@@ -2,17 +2,17 @@ namespace Prog
 {
     public abstract class SyntaxNode
     {
-        // public SyntaxNode Parent { get; }
-        public List<SyntaxNode> Children { get; } = new List<SyntaxNode>();
+        public List<SyntaxNode> Children { get; } = [];
 
         public override string ToString() => GetType().ToString();
 
-        public abstract TResult Accept<TResult>(SyntaxVisitor<TResult> visitor);
+        public abstract TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
+            where TResult : notnull;
     }
 
     public sealed class ProgramSyntax : SyntaxNode
     {
-        public List<Statement> Statements => Children.Cast<Statement>().ToList();
+        public List<Statement> Statements => [.. Children.Cast<Statement>()];
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -26,6 +26,15 @@ namespace Prog
 
     public abstract class ExpressionSyntax : SyntaxNode
     {
+        public static ExpressionSyntax Empty { get; } = new EmptyExpressionSyntax();
+    }
+
+    public sealed class EmptyExpressionSyntax : ExpressionSyntax
+    {
+        public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
+        {
+            throw new Exception("Can not visit empty expression syntax.");
+        }
     }
 
     public sealed class EmptyExpression : ExpressionSyntax
@@ -60,7 +69,7 @@ namespace Prog
 
         public IdentifierNameSyntax Identifier => (IdentifierNameSyntax)Children.First();
 
-        public ExpressionSyntax Value => Children.Count > 1 ? (ExpressionSyntax)Children[1] : null;
+        public ExpressionSyntax? Value => Children.Count > 1 ? (ExpressionSyntax)Children[1] : null;
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -74,7 +83,7 @@ namespace Prog
 
         public Statement ThenStatement => (Statement)Children[1];
 
-        public Statement ElseStatement => Children.Count > 2 ? (Statement)Children[2] : null;
+        public Statement? ElseStatement => Children.Count > 2 ? (Statement)Children[2] : null;
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -96,7 +105,7 @@ namespace Prog
 
     public sealed class BlockExpression : ExpressionSyntax
     {
-        public List<Statement> Statements => Children.Cast<Statement>().ToList();
+        public List<Statement> Statements => [.. Children.Cast<Statement>()];
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -106,12 +115,12 @@ namespace Prog
 
     public sealed class LiteralExpressionSyntax : ExpressionSyntax
     {
-        public Token Token { get; }
-
         public LiteralExpressionSyntax(Token token)
         {
             Token = token;
         }
+
+        public Token Token { get; }
 
         public override string ToString() => Token.Value;
 
@@ -196,7 +205,7 @@ namespace Prog
 
         public IdentifierNameSyntax IdentifierName => (IdentifierNameSyntax)Children[0];
 
-        public ArgumentListSyntax ArgumentList => Children.Count > 1 ? (ArgumentListSyntax)Children[1] : null;
+        public ArgumentListSyntax? ArgumentList => Children.Count > 1 ? (ArgumentListSyntax)Children[1] : null;
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -206,7 +215,7 @@ namespace Prog
 
     public sealed class ArgumentListSyntax : SyntaxNode
     {
-        public List<ExpressionSyntax> Arguments => Children.Cast<ExpressionSyntax>().ToList();
+        public List<ExpressionSyntax> Arguments => [.. Children.Cast<ExpressionSyntax>()];
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {

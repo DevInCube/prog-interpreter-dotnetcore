@@ -4,7 +4,7 @@ namespace Prog
 {
     internal static class SyntaxTreePrinter
     {
-        public static void PrintParseTree(ProgramSyntax syntaxTree)
+        public static void PrintParseTree(ProgramSyntax? syntaxTree)
         {
             if (syntaxTree != null)
             {

@@ -2,8 +2,8 @@ namespace Prog
 {
     public class ExecutionVisitor : SyntaxVisitor<ProgValue>
     {
-        private readonly SymbolTable _symbolTable = new SymbolTable();
-        private readonly ExecutionLogger _logger = new ExecutionLogger();
+        private readonly SymbolTable _symbolTable = new();
+        private readonly ExecutionLogger _logger = new();
 
         public override ProgValue Visit(ProgramSyntax syntax)
         {
@@ -115,9 +115,13 @@ namespace Prog
 
             ProgValue Assignment()
             {
-                var varName = (syntax.Left as IdentifierNameSyntax).Name;
+                var identifier = syntax.Left as IdentifierNameSyntax
+                    ?? throw new Exception("Expected identifier in assignment.");
+                var varName = identifier.Name;
                 var value = syntax.Right.Accept(this);
-                _symbolTable.FindSymbol(varName).Value = value;
+                var symbol = _symbolTable.FindSymbol(varName)
+                    ?? throw new Exception($"Symbol {varName} was not found for assignment.");
+                symbol.Value = value;
                 return value;
             }
         }
@@ -145,7 +149,7 @@ namespace Prog
                 "none" => NoneValue.Value,
                 "true" => new BooleanValue(true),
                 "false" => new BooleanValue(false),
-                var s when s.StartsWith("\"") => new StringValue(s.Substring(1, s.Length - 2)),
+                var s when s.StartsWith("\"") => new StringValue(s[1..^1]),
                 _ => new NumberValue(double.Parse(syntax.Token.Value)),
             };
         }
@@ -161,7 +165,7 @@ namespace Prog
 
         public override ProgValue Visit(InvocationExpressionSyntax syntax)
         {
-            var arguments = syntax.ArgumentList.Arguments.Select(a => a.Accept(this)).ToArray();
+            var arguments = syntax.ArgumentList?.Arguments.Select(a => a.Accept(this)).ToArray() ?? [];
             _logger.Log($"INVOCATION: {syntax.IdentifierName.Name}, {arguments.Length}");
             if (!Lang.Functions.TryGetValue(syntax.IdentifierName.Name, out var function))
             {

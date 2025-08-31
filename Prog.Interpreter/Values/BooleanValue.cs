@@ -11,7 +11,7 @@
 
         public static implicit operator bool(BooleanValue d) => d.Value;
 
-        public static implicit operator BooleanValue(bool b) => new BooleanValue(b);
+        public static implicit operator BooleanValue(bool b) => new(b);
 
         public override string ToString() => Value.ToString();
 
