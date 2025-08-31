@@ -133,7 +133,9 @@ namespace Prog
 
         public override ProgValue Visit(IdentifierNameSyntax syntax)
         {
-            var value = _symbolTable.FindSymbol(syntax.Name)?.Value;
+            var symbol = _symbolTable.FindSymbol(syntax.Name)
+                ?? throw new Exception($"Undefined symbol `{syntax.Name}`.");
+            var value = symbol.Value;
             _logger.Log($"ID: {syntax.Name} = {value}");
             return value;
         }

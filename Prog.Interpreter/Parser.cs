@@ -263,7 +263,7 @@ namespace Prog
             if (Accept("(") == null) return null;
             var argsTree = new ArgumentListSyntax();
             bool closed = false;
-            while (Expression() is var arg && arg != null && !closed)
+            while (!closed && Expression() is var arg && arg != null)
             {
                 argsTree.Children.Add(arg);
                 if (Accept(")") != null)

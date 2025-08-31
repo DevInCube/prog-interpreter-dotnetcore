@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Prog.Console": {
+      "commandName": "Project",
+      "commandLineArgs": "./data/main.prog"
+    }
+  }
+}

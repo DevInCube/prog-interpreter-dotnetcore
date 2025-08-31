@@ -9,4 +9,10 @@
     <ProjectReference Include="..\Prog.Interpreter\Prog.Interpreter.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="data\main.prog">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

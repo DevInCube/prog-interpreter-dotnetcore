@@ -1,6 +1,14 @@
 let a
 let b
 let c
+
+// Nested variables
+{
+    let a = 10
+    let b = a + 1
+    print("a and b ", a, b)
+}
+
 //a = b = c = 5
 print(a, b, c, 2 - 2 - 2, (2 - 2) - 2, 2 - (2 - 2))
 let sum = 0
