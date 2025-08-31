@@ -16,7 +16,7 @@ namespace Prog
 
     public sealed class ProgramSyntax : SyntaxNode
     {
-        public List<BlockedStatement> Statements => Children.Cast<BlockedStatement>().ToList();
+        public List<Statement> Statements => Children.Cast<Statement>().ToList();
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -28,7 +28,11 @@ namespace Prog
     {
     }
 
-    public sealed class EmptyStatement : StatementSyntax
+    public abstract class ExpressionSyntax : SyntaxNode
+    {
+    }
+
+    public sealed class EmptyExpression : ExpressionSyntax
     {
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -36,13 +40,13 @@ namespace Prog
         }
     }
 
-    public sealed class BlockedStatement : StatementSyntax
+    public sealed class Statement : StatementSyntax
     {
-        public StatementSyntax Statement => (StatementSyntax)Children.First();
+        public ExpressionSyntax Expression => (ExpressionSyntax)Children.First();
 
-        public BlockedStatement(StatementSyntax statement)
+        public Statement(ExpressionSyntax expression)
         {
-            Children.Add(statement);
+            Children.Add(expression);
         }
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
@@ -50,16 +54,16 @@ namespace Prog
             return visitor.Visit(this);
         }
     }
-    public sealed class VariableDeclarationStatementSyntax : StatementSyntax
+    public sealed class VariableDeclarationExpressionSyntax : ExpressionSyntax
     {
-        public VariableDeclarationStatementSyntax(IdentifierNameSyntax declarator)
+        public VariableDeclarationExpressionSyntax(IdentifierNameSyntax declarator)
         {
             Children.Add(declarator);
         }
 
         public IdentifierNameSyntax Identifier => (IdentifierNameSyntax)Children.First();
 
-        public StatementSyntax Value => Children.Count > 1 ? (StatementSyntax)Children[1] : null;
+        public ExpressionSyntax Value => Children.Count > 1 ? (ExpressionSyntax)Children[1] : null;
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -67,11 +71,11 @@ namespace Prog
         }
     }
 
-    public sealed class IfStatementSyntax : StatementSyntax
+    public sealed class IfExpressionSyntax : ExpressionSyntax
     {
-        public StatementSyntax Condition => (StatementSyntax)Children[0];
-        public BlockedStatement ThenStatement => (BlockedStatement)Children[1];
-        public BlockedStatement ElseStatement => Children.Count > 2 ? (BlockedStatement)Children[2] : null;
+        public ExpressionSyntax Condition => (ExpressionSyntax)Children[0];
+        public Statement ThenStatement => (Statement)Children[1];
+        public Statement ElseStatement => Children.Count > 2 ? (Statement)Children[2] : null;
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -79,10 +83,10 @@ namespace Prog
         }
     }
 
-    public sealed class WhileStatementSyntax : StatementSyntax
+    public sealed class WhileExpressionSyntax : ExpressionSyntax
     {
-        public StatementSyntax Condition => (StatementSyntax)Children[0];
-        public BlockedStatement Statement => (BlockedStatement)Children[1];
+        public ExpressionSyntax Condition => (ExpressionSyntax)Children[0];
+        public Statement Statement => (Statement)Children[1];
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
@@ -90,18 +94,14 @@ namespace Prog
         }
     }
 
-    public sealed class BlockSyntax : StatementSyntax
+    public sealed class BlockExpression : ExpressionSyntax
     {
-        public List<BlockedStatement> Statements => Children.Cast<BlockedStatement>().ToList();
+        public List<Statement> Statements => Children.Cast<Statement>().ToList();
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {
             return visitor.Visit(this);
         }
-    }
-
-    public abstract class ExpressionSyntax : StatementSyntax
-    {
     }
 
     public sealed class LiteralExpressionSyntax : ExpressionSyntax
@@ -122,13 +122,13 @@ namespace Prog
 
     public sealed class UnaryExpressionSyntax : ExpressionSyntax
     {
-        public UnaryExpressionSyntax(Token token, StatementSyntax expression)
+        public UnaryExpressionSyntax(Token token, ExpressionSyntax expression)
         {
             OperatorToken = token;
             Children.Add(expression);
         }
         public Token OperatorToken { get; }
-        public StatementSyntax Operand => (StatementSyntax)Children.First();
+        public ExpressionSyntax Operand => (ExpressionSyntax)Children.First();
 
         public override string ToString() => this.OperatorToken.Value;
 
@@ -142,8 +142,8 @@ namespace Prog
     {
         public BinaryExpressionSyntax(
             Token token,
-            StatementSyntax leftExpression,
-            StatementSyntax rightExpression)
+            ExpressionSyntax leftExpression,
+            ExpressionSyntax rightExpression)
         {
             OperatorToken = token;
             Children.Add(leftExpression);
@@ -151,8 +151,8 @@ namespace Prog
         }
 
         public Token OperatorToken { get; }
-        public StatementSyntax Left => (StatementSyntax)Children[0];
-        public StatementSyntax Right => (StatementSyntax)Children[1];
+        public ExpressionSyntax Left => (ExpressionSyntax)Children[0];
+        public ExpressionSyntax Right => (ExpressionSyntax)Children[1];
 
         public override string ToString() => this.OperatorToken.Value;
 
@@ -200,7 +200,7 @@ namespace Prog
 
     public sealed class ArgumentListSyntax : SyntaxNode
     {
-        public List<StatementSyntax> Arguments => Children.Cast<StatementSyntax>().ToList();
+        public List<ExpressionSyntax> Arguments => Children.Cast<ExpressionSyntax>().ToList();
 
         public override TResult Accept<TResult>(SyntaxVisitor<TResult> visitor)
         {

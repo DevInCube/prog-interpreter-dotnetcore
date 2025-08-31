@@ -1,18 +1,19 @@
-program = {blocked statement};
-var decl = "let", identifier, ["=", expr];
-statement = 
-    compound statement
-    | var decl
-    | select statement
-    | loop statement
-    | expr;
-empty statement = ";";
-blocked statement =
-    empty statement
-    | expr, [empty statement];
-compound statement = "{", {blocked statement}, "}";
-select statement = "if", "(", expr, ")", blocked statement, ["else", blocked statement];
-loop statement = "while", "(", expr, ")", blocked statement;
+program = statements;
+statements = {statement};
+statement =
+    ";"
+    | expr, [";"];
+
+statement expression = 
+    var decl expression
+    | compound expression
+    | select expression
+    | loop expression;
+
+compound expression = "{", statements, "}";
+var decl expression = "let", identifier, ["=", expr];
+select expression = "if", "(", expr, ")", statement, ["else", statement];
+loop expression = "while", "(", expr, ")", statement;
 
 expr = assign;
 assign = identifier, "=", expr | logic or;
@@ -23,7 +24,7 @@ logic comp = add | logic comp, ("<" | "<=" | ">" | ">="), add;
 add = mult | add, ("+" | "-"), mult;
 mult = unary | mult, ("*" | "/" | "%"), unary;
 unary = primary | ("!" | "+" | "-"), primary;
-primary = identifier | func call | "(", expr, ")" | literal | statement;
+primary = identifier | func call | "(", expr, ")" | literal | statement expression;
 func call = identifier, "(", [expr], {",", expr}, ")";
 
 # lexical grammar

@@ -21,17 +21,17 @@ namespace Prog
             return NoneValue.Value;
         }
 
-        public override ProgValue Visit(EmptyStatement syntax)
+        public override ProgValue Visit(EmptyExpression syntax)
         {
             return NoneValue.Value;
         }
 
-        public override ProgValue Visit(BlockedStatement syntax)
+        public override ProgValue Visit(Statement syntax)
         {
-            return syntax.Statement.Accept(this);
+            return syntax.Expression.Accept(this);
         }
 
-        public override ProgValue Visit(VariableDeclarationStatementSyntax syntax)
+        public override ProgValue Visit(VariableDeclarationExpressionSyntax syntax)
         {
             var value = syntax.Value?.Accept(this) ?? NoneValue.Value;
             _logger.Log($"VAR: {syntax.Identifier.Name} = {value}");
@@ -39,7 +39,7 @@ namespace Prog
             return value;
         }
 
-        public override ProgValue Visit(BlockSyntax syntax)
+        public override ProgValue Visit(BlockExpression syntax)
         {
             _logger.Log("BLOCK BEGIN");
             _symbolTable.EnterScope();
@@ -56,7 +56,7 @@ namespace Prog
             return lastValue;
         }
 
-        public override ProgValue Visit(IfStatementSyntax syntax)
+        public override ProgValue Visit(IfExpressionSyntax syntax)
         {
             _logger.Log("IF BEGIN");
             var value = syntax.Condition.Accept(this);
@@ -74,7 +74,7 @@ namespace Prog
             return returnValue;
         }
 
-        public override ProgValue Visit(WhileStatementSyntax syntax)
+        public override ProgValue Visit(WhileExpressionSyntax syntax)
         {
             _logger.Log("WHILE BEGIN");
             ProgValue returnValue = NoneValue.Value;

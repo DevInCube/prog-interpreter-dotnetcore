@@ -70,16 +70,16 @@ namespace Prog
             throw new Exception($"Expected `{type}`, got `{Current.Type}:{Current.Value}`");
         }
 
-        VariableDeclarationStatementSyntax VarDeclaration()
+        VariableDeclarationExpressionSyntax VarDeclarationExpression()
         {
             if (Accept("let") == null) return null;
             var idToken = Expect(TokenType.Identifier);
-            var varDecl = new VariableDeclarationStatementSyntax(new IdentifierNameSyntax(idToken.Value));
+            var varDecl = new VariableDeclarationExpressionSyntax(new IdentifierNameSyntax(idToken.Value));
             if (VarPrimeDeclaration() is var initExpr && initExpr != null)
                 varDecl.Children.Add(initExpr);
             return varDecl;
 
-            StatementSyntax VarPrimeDeclaration()
+            ExpressionSyntax VarPrimeDeclaration()
             {
                 if (Accept("=") == null) return null;
                 if (Expression() is var initExpression && initExpression == null)
@@ -88,70 +88,57 @@ namespace Prog
             }
         }
 
-        StatementSyntax Statement()
+        ExpressionSyntax StatementExpression()
         {
-            return VarDeclaration()
-                ?? IfStatement()
-                ?? WhileStatement()
-                ?? (StatementSyntax)BlockStatement();
+            return VarDeclarationExpression()
+                ?? IfExpression()
+                ?? WhileExpression()
+                ?? (ExpressionSyntax)BlockExpression();
         }
 
-        EmptyStatement? EmptyStatement()
+        EmptyExpression? EmptyExpression()
         {
             return Accept(";") != null
-                ? new EmptyStatement()
+                ? new EmptyExpression()
                 : null;
         }
 
-        BlockedStatement? BlockedStatement()
+        Statement? Statement()
         {
-            if (EmptyStatement() is EmptyStatement emptyStatement)
+            if (EmptyExpression() is EmptyExpression emptyExpression)
             {
-                return new BlockedStatement(emptyStatement);
+                return new Statement(emptyExpression);
             }
 
             var statement = Expression();
-            _ = EmptyStatement();
+            _ = EmptyExpression();
             if (statement == null)
             {
                 return null;
             }
 
-            return new BlockedStatement(statement);
+            return new Statement(statement);
         }
 
-        BlockSyntax BlockStatement()
+        BlockExpression BlockExpression()
         {
             if (Accept("{") == null) return null;
-            bool closed = false;
-            var block = new BlockSyntax();
-            while (!closed && BlockedStatement() is var statement && statement != null)
-            {
-                block.Children.Add(statement);
-                if (Accept("}") != null)
-                {
-                    closed = true;
-                }
-            }
-
-            if (!closed)
-            {
-                Expect("}");
-            }
-
+            var block = new BlockExpression();
+            block.Children.AddRange(Statements());
+            Expect("}");
             return block;
         }
 
-        IfStatementSyntax IfStatement()
+        IfExpressionSyntax IfExpression()
         {
             if (Accept("if") == null) return null;
             Expect("(");
             if (Expression() is var testExpression && testExpression == null)
                 throw new Exception("Expected test expression");
             Expect(")");
-            if (BlockedStatement() is var thenStatement && thenStatement == null)
+            if (Statement() is var thenStatement && thenStatement == null)
                 throw new Exception("Expected then statement after test expression");
-            var ifStatement = new IfStatementSyntax
+            var ifStatement = new IfExpressionSyntax
             {
                 Children = { testExpression, thenStatement }
             };
@@ -162,22 +149,22 @@ namespace Prog
             StatementSyntax SelectPrimeStatement()
             {
                 if (Accept("else") == null) return null;
-                if (BlockedStatement() is var elseStatement && elseStatement == null)
+                if (Statement() is var elseStatement && elseStatement == null)
                     throw new Exception("Expected then statement after else keyword");
                 return elseStatement;
             }
         }
 
-        WhileStatementSyntax WhileStatement()
+        WhileExpressionSyntax WhileExpression()
         {
             if (Accept("while") == null) return null;
             Expect("(");
             if (Expression() is var testExpression && testExpression == null)
                 throw new Exception("Expected test expression");
             Expect(")");
-            if (BlockedStatement() is var bodyStatement && bodyStatement == null)
+            if (Statement() is var bodyStatement && bodyStatement == null)
                 throw new Exception("Expected body statement after test expression");
-            return new WhileStatementSyntax
+            return new WhileExpressionSyntax
             {
                 Children = { testExpression, bodyStatement }
             };
@@ -187,15 +174,21 @@ namespace Prog
         ProgramSyntax Program()
         {
             var program = new ProgramSyntax();
-            while (BlockedStatement() is var statement && statement != null)
-            {
-                program.Children.Add(statement);
-            }
-
+            program.Children.AddRange(Statements());
             return program;
         }
-        StatementSyntax Expression() => Assignment();
-        StatementSyntax Assignment() => BinaryOperations();
+
+        IEnumerable<Statement> Statements()
+        {
+            while (Statement() is Statement statement)
+            {
+                yield return statement;
+            }
+        }
+
+        ExpressionSyntax Expression() => Assignment();
+
+        ExpressionSyntax Assignment() => BinaryOperations();
 
         private static OperatorInfo[][] PrioritizedBinaryOperators
             = Lang.OperatorsTable
@@ -205,19 +198,20 @@ namespace Prog
                 .GroupBy(x => x.Priority)
                 .Select(x => x.ToArray())
                 .ToArray();
-        StatementSyntax BinaryOperations()
+
+        ExpressionSyntax BinaryOperations()
         {
             return BinaryRecur();
             //
-            StatementSyntax BinaryRecur(int i = 0)
+            ExpressionSyntax BinaryRecur(int i = 0)
             {
-                Func<StatementSyntax> nextOperation = () => BinaryRecur(i + 1);
+                Func<ExpressionSyntax> nextOperation = () => BinaryRecur(i + 1);
                 if (i == PrioritizedBinaryOperators.Length - 1)
                     nextOperation = UnaryOperation;
                 return BinaryOperation(PrioritizedBinaryOperators[i], nextOperation);
             }
         }
-        StatementSyntax BinaryOperation(OperatorInfo[] operators, Func<StatementSyntax> nextOperation)
+        ExpressionSyntax BinaryOperation(OperatorInfo[] operators, Func<ExpressionSyntax> nextOperation)
         {
             if (nextOperation() is var nextRuleTree && nextRuleTree == null) return null;
             if (BinaryOperationPrime(operators, nextOperation) is var primeRuleTree && primeRuleTree != null)
@@ -231,7 +225,7 @@ namespace Prog
             return nextRuleTree;
         }
 
-        StatementSyntax BinaryOperationPrime(OperatorInfo[] operators, Func<StatementSyntax> nextOperation)
+        ExpressionSyntax BinaryOperationPrime(OperatorInfo[] operators, Func<ExpressionSyntax> nextOperation)
         {
             if (AcceptOperator() is var operatorToken && operatorToken == null) return null;
             if (nextOperation() is var nextRuleTree && nextRuleTree == null) // left
@@ -257,7 +251,7 @@ namespace Prog
 
             Token AcceptOperator() => operators.Select(op => Accept(op.Lexeme)).FirstOrDefault(token => token != null);
         }
-        StatementSyntax UnaryOperation()
+        ExpressionSyntax UnaryOperation()
         {
             var operatorToken = Accept(TokenType.Operator);
             var primitiveTree = PrimaryOperation();
@@ -272,14 +266,14 @@ namespace Prog
             }
             return primitiveTree;
         }
-        StatementSyntax PrimaryOperation()
+        ExpressionSyntax PrimaryOperation()
         {
             if (Accept(TokenType.Identifier) is var token && token != null)
             {
                 var idName = new IdentifierNameSyntax(token.Value);
                 return (ArgumentList() is var argumentList && argumentList != null)
                     ? new InvocationExpressionSyntax(idName, argumentList)
-                    : (StatementSyntax)idName;
+                    : idName;
             }
             if (Accept("(") != null)
             {
@@ -290,7 +284,7 @@ namespace Prog
             }
             if ((token = Accept(TokenType.Literal)) != null)
                 return new LiteralExpressionSyntax(token);
-            return Statement();
+            return StatementExpression();
         }
         ArgumentListSyntax ArgumentList()
         {
