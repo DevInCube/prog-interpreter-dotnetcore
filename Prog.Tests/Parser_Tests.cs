@@ -97,6 +97,32 @@ namespace Prog.Tests
             Assert.IsTrue(tree.Children[0].Children[0].Children[1] is BinaryExpressionSyntax);
         }
 
+        [TestCase("let x = let y")]
+        [TestCase("let x = if (true) 1 else 0")]
+        [TestCase("let x = while (true) { 5 }")]
+        [TestCase("let x = { 5 }")]
+        [TestCase("{ 5 } + 1")]
+        public void Parse_StatementAreExpressions_IsSuccess(string text)
+        {
+            var tokens = Lexer.Analyze(text).ToList();
+            var tree = Parser.Parse(tokens);
+            Assert.IsTrue(tree is ProgramSyntax);
+            Assert.AreEqual(1, tree.Children.Count);
+            Assert.AreEqual(1, tree.Children[0].Children.Count);
+        }
+
+        [TestCase("let x let y")]
+        [TestCase("let x; let y")]
+        [TestCase("print(\"1\") print(\"2\")")]
+        [TestCase("print(\"1\"); print(\"2\")")]
+        [TestCase(";;;")]
+        public void Parse_OptionalSemicolon_IsSuccess(string text)
+        {
+            var tokens = Lexer.Analyze(text).ToList();
+            var tree = Parser.Parse(tokens);
+            Assert.IsTrue(tree is ProgramSyntax);
+        }
+
         [TestCase("*3")]
         [TestCase("/3")]
         [TestCase("%3")]
